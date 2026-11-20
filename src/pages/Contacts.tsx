@@ -68,7 +68,10 @@ export function ContactsPage() {
                   </div>
                 </div>
                 <div className="actions">
-                  <span className="chip" title={c.region === 'US' ? 'United States' : 'Canada'}>
+                  <span
+                    className="chip flag-chip"
+                    title={c.region === 'US' ? 'United States' : 'Canada'}
+                  >
                     {c.region === 'US' ? '🇺🇸' : '🇨🇦'}
                   </span>
                 </div>

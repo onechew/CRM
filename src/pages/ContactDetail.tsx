@@ -106,7 +106,7 @@ export function ContactDetailPage() {
           <p className="muted" style={{ margin: 0 }}>
             {contact.company || 'No company'} ·{' '}
             <span
-              className="chip"
+              className="chip flag-chip"
               title={contact.region === 'US' ? 'United States' : 'Canada'}
             >
               {contact.region === 'US' ? '🇺🇸' : '🇨🇦'}

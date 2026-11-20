@@ -94,10 +94,18 @@ export function TodayPage() {
           <p className="owner-strip owner-strip-contacts" aria-label="Your send-from details">
             <a href={`mailto:${owner.email}`}>{owner.email}</a>
             <span aria-hidden="true">·</span>
-            <span title="Canada line">🇨🇦 {owner.phoneCA || '-'}</span>
+            <span title="Canada line">
+              <span className="owner-flag" aria-hidden="true">
+                🇨🇦
+              </span>{' '}
+              {owner.phoneCA || '-'}
+            </span>
             <span aria-hidden="true">·</span>
             <span title="US line">
-              🇺🇸 {owner.phoneUS.trim() ? owner.phoneUS : 'not set'}
+              <span className="owner-flag" aria-hidden="true">
+                🇺🇸
+              </span>{' '}
+              {owner.phoneUS.trim() ? owner.phoneUS : 'not set'}
             </span>
             <Link className="owner-strip-edit" to="/settings">
               Edit

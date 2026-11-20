@@ -374,10 +374,12 @@ h3 {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.4rem 0.55rem;
+  gap: 0.5rem 0.75rem;
   font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  color: rgba(231, 238, 245, 0.88);
+  font-size: clamp(1.05rem, 2.2vw, 1.2rem);
+  font-weight: 550;
+  line-height: 1.35;
+  color: rgba(231, 238, 245, 0.92);
 }
 
 .owner-strip-contacts a {
@@ -389,9 +391,14 @@ h3 {
   color: #fff;
 }
 
+.owner-flag {
+  font-size: 1.35em;
+  line-height: 1;
+}
+
 .owner-strip-edit {
   font-family: var(--font-body) !important;
-  font-size: var(--text-xs) !important;
+  font-size: 0.95em !important;
   font-weight: 650;
   letter-spacing: 0.02em;
   margin-left: 0.15rem;
@@ -733,8 +740,25 @@ h3 {
 
 .task-card-flag {
   margin-left: auto;
-  font-size: 0.95rem;
+  font-size: 1.55rem;
   line-height: 1;
+}
+
+.flag-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.45rem;
+  line-height: 1;
+}
+
+.chip.flag-chip {
+  min-height: 2rem;
+  padding: 0.25rem 0.55rem;
+  font-size: 1.35rem;
+  letter-spacing: 0;
+  text-transform: none;
+  background: rgba(63, 111, 146, 0.1);
 }
 
 .task-card-title {
