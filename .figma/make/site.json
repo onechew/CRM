@@ -1,0 +1,11 @@
+{
+  "title": "Future Buildings CRM",
+  "description": "A free CRM for sales reps to manage contacts, schedule follow-ups, and prepare email and SMS drafts in one streamlined workspace.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": true,
+    "ignoreReducedMotion": false
+  }
+}
