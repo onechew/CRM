@@ -45,7 +45,12 @@ export function ContactsPage() {
 
       <div className="panel">
         {results.length === 0 ? (
-          <div className="empty">No contacts match that search.</div>
+          <div className="empty">
+            <strong>{q.trim() ? 'No matches' : 'No contacts yet'}</strong>
+            {q.trim()
+              ? 'Try a different name, company, email, or phone.'
+              : 'Add real contacts as you go — nothing is pre-seeded.'}
+          </div>
         ) : (
           <ul className="list">
             {results.map((c) => (
