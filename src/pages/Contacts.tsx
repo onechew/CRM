@@ -56,25 +56,27 @@ export function ContactsPage() {
         ) : (
           <ul className="list">
             {results.map((c) => (
-              <li key={c.id} className="list-row">
-                <div>
-                  <Link className="title" to={`/contacts/${c.id}`}>
-                    {c.name}
-                  </Link>
-                  <div className="meta">
-                    {c.company || '-'}
-                    {c.email ? ` · ${c.email}` : ''}
-                    {c.phone ? ` · ${c.phone}` : ''}
+              <li key={c.id}>
+                <Link
+                  className="list-row list-row-clickable"
+                  to={`/contacts/${c.id}`}
+                  aria-label={`Open ${c.name}`}
+                >
+                  <div>
+                    <div className="title">{c.name}</div>
+                    <div className="meta">
+                      {c.company || '-'}
+                      {c.email ? ` · ${c.email}` : ''}
+                      {c.phone ? ` · ${c.phone}` : ''}
+                    </div>
                   </div>
-                </div>
-                <div className="actions">
                   <span
                     className="chip flag-chip"
                     title={c.region === 'US' ? 'United States' : 'Canada'}
                   >
                     {c.region === 'US' ? '🇺🇸' : '🇨🇦'}
                   </span>
-                </div>
+                </Link>
               </li>
             ))}
           </ul>
