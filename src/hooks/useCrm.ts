@@ -55,7 +55,11 @@ export function useCrm() {
   );
 
   const upsertContact = useCallback(
-    (input: Omit<Contact, 'id' | 'createdAt' | 'updatedAt'> & { id?: string }) => {
+    (
+      input: Omit<Contact, 'id' | 'createdAt' | 'updatedAt' | 'caslConsent'> & {
+        id?: string;
+      },
+    ) => {
       const now = touch();
       const region = input.region === 'US' ? 'US' : 'CA';
       update((prev) => {
@@ -72,7 +76,7 @@ export function useCrm() {
                     email: input.email,
                     notes: input.notes,
                     region,
-                    caslConsent: input.caslConsent,
+                    caslConsent: true,
                     updatedAt: now,
                   }
                 : c,
@@ -87,7 +91,7 @@ export function useCrm() {
           email: input.email,
           notes: input.notes,
           region,
-          caslConsent: input.caslConsent,
+          caslConsent: true,
           createdAt: now,
           updatedAt: now,
         };

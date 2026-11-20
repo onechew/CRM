@@ -85,7 +85,6 @@ export function SettingsPage() {
           ) : null}
           <p className="casl-note">
             Drafts still open in your mail or Messages app — nothing auto-sends.
-            Honour STOP / ARRÊT when you send real SMS later.
           </p>
           <div className="actions">
             <button type="submit" className="btn btn-primary">

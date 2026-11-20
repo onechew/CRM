@@ -50,13 +50,17 @@ export async function copyText(text: string) {
 
 export function formatWhen(iso: string) {
   const d = new Date(iso);
-  return d.toLocaleString(undefined, {
+  const raw = d.toLocaleString('en-US', {
     weekday: 'short',
     month: 'short',
     day: 'numeric',
     hour: 'numeric',
     minute: '2-digit',
+    hour12: true,
   });
+  return raw.replace(/\s*(a\.?m\.?|p\.?m\.?)/i, (_, mer) =>
+    /p/i.test(mer) ? ' PM' : ' AM',
+  );
 }
 
 export function isOverdue(iso: string) {

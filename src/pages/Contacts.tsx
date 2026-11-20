@@ -14,7 +14,6 @@ export function ContactsPage() {
     email: '',
     notes: '',
     region: 'CA' as ContactRegion,
-    caslConsent: false,
   });
 
   const results = useMemo(() => searchContacts(q), [searchContacts, q]);
@@ -71,11 +70,6 @@ export function ContactsPage() {
                   <span className="chip" title={c.region === 'US' ? 'United States' : 'Canada'}>
                     {c.region === 'US' ? '🇺🇸' : '🇨🇦'}
                   </span>
-                  {c.caslConsent ? (
-                    <span className="chip ok">Consent</span>
-                  ) : (
-                    <span className="chip danger">No consent</span>
-                  )}
                 </div>
               </li>
             ))}
@@ -84,8 +78,15 @@ export function ContactsPage() {
       </div>
 
       {showForm ? (
-        <div className="drawer-overlay" role="dialog" aria-modal="true">
-          <div className="drawer">
+        <div
+          className="drawer-overlay"
+          role="dialog"
+          aria-modal="true"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) setShowForm(false);
+          }}
+        >
+          <div className="drawer" onMouseDown={(e) => e.stopPropagation()}>
             <h3>New contact</h3>
             <form
               className="form-grid"
@@ -99,7 +100,6 @@ export function ContactsPage() {
                   email: '',
                   notes: '',
                   region: 'CA',
-                  caslConsent: false,
                 });
                 setShowForm(false);
               }}
@@ -146,8 +146,8 @@ export function ContactsPage() {
                     setForm({ ...form, region: e.target.value as ContactRegion })
                   }
                 >
-                  <option value="CA">🇨🇦 Canada — use your 🇨🇦 phone line</option>
-                  <option value="US">🇺🇸 United States — use your 🇺🇸 phone line</option>
+                  <option value="CA">🇨🇦 Canada</option>
+                  <option value="US">🇺🇸 United States</option>
                 </select>
               </label>
               <label className="field">
@@ -156,19 +156,6 @@ export function ContactsPage() {
                   value={form.notes}
                   onChange={(e) => setForm({ ...form, notes: e.target.value })}
                 />
-              </label>
-              <label className="check-row">
-                <input
-                  type="checkbox"
-                  checked={form.caslConsent}
-                  onChange={(e) => setForm({ ...form, caslConsent: e.target.checked })}
-                />
-                <span>
-                  CASL consent on file for commercial email/SMS
-                  <p className="casl-note">
-                    When you send real SMS later, honour STOP / ARRÊT promptly. Not legal advice.
-                  </p>
-                </span>
               </label>
               <div className="actions">
                 <button type="submit" className="btn btn-primary">

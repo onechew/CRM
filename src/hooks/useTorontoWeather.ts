@@ -30,11 +30,16 @@ export function formatTorontoDate(date = new Date()) {
 }
 
 export function formatTorontoTime(date = new Date()) {
-  return new Intl.DateTimeFormat('en-CA', {
+  const raw = new Intl.DateTimeFormat('en-US', {
     timeZone: TZ,
     hour: 'numeric',
     minute: '2-digit',
+    hour12: true,
   }).format(date);
+  // en-US is already AM/PM; normalize any locale variants to uppercase AM/PM
+  return raw.replace(/\s*(a\.?m\.?|p\.?m\.?)/i, (_, mer) =>
+    /p/i.test(mer) ? ' PM' : ' AM',
+  );
 }
 
 export type TorontoWeather = {

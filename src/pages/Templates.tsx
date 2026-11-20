@@ -170,8 +170,15 @@ export function TemplatesPage() {
       </div>
 
       {open ? (
-        <div className="drawer-overlay" role="dialog" aria-modal="true">
-          <div className="drawer">
+        <div
+          className="drawer-overlay"
+          role="dialog"
+          aria-modal="true"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) setOpen(false);
+          }}
+        >
+          <div className="drawer" onMouseDown={(e) => e.stopPropagation()}>
             <h3>
               {editingId ? 'Edit' : 'New'} {form.channel === 'email' ? 'email' : 'SMS'} template
             </h3>
@@ -232,11 +239,6 @@ export function TemplatesPage() {
                   onChange={(e) => setForm({ ...form, body: e.target.value })}
                 />
               </label>
-              {form.channel === 'sms' ? (
-                <p className="casl-note">
-                  Include STOP language for commercial SMS when you send for real later.
-                </p>
-              ) : null}
               <div className="actions">
                 <button type="submit" className="btn btn-primary">
                   Save

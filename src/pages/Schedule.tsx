@@ -124,8 +124,15 @@ export function SchedulePage() {
       </div>
 
       {open ? (
-        <div className="drawer-overlay" role="dialog" aria-modal="true">
-          <div className="drawer">
+        <div
+          className="drawer-overlay"
+          role="dialog"
+          aria-modal="true"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) setOpen(false);
+          }}
+        >
+          <div className="drawer" onMouseDown={(e) => e.stopPropagation()}>
             <h3>Schedule follow-up</h3>
             <form
               className="form-grid"
@@ -133,15 +140,6 @@ export function SchedulePage() {
                 e.preventDefault();
                 const contact = getContact(form.contactId);
                 if (!contact) return;
-                if (!contact.caslConsent && form.channel !== 'call') {
-                  if (
-                    !window.confirm(
-                      'No CASL consent flagged for this contact. Schedule anyway?',
-                    )
-                  ) {
-                    return;
-                  }
-                }
                 const due = fromLocalInputValue(form.dueAt);
                 if (form.asSequence && form.channel === 'email') {
                   const seq = uuid();

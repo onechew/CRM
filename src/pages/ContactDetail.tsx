@@ -44,7 +44,6 @@ export function ContactDetailPage() {
     email: '',
     notes: '',
     region: 'CA' as ContactRegion,
-    caslConsent: false,
   });
 
   const [scheduleOpen, setScheduleOpen] = useState(false);
@@ -79,7 +78,6 @@ export function ContactDetailPage() {
       email: contact.email,
       notes: contact.notes,
       region: contact.region === 'US' ? 'US' : 'CA',
-      caslConsent: contact.caslConsent,
     });
     setEditing(true);
   };
@@ -111,12 +109,7 @@ export function ContactDetailPage() {
               title={contact.region === 'US' ? 'United States' : 'Canada'}
             >
               {contact.region === 'US' ? '🇺🇸' : '🇨🇦'}
-            </span>{' '}
-            {contact.caslConsent ? (
-              <span className="chip ok">CASL consent</span>
-            ) : (
-              <span className="chip danger">No CASL consent</span>
-            )}
+            </span>
           </p>
         </div>
         <div className="actions">
@@ -165,10 +158,6 @@ export function ContactDetailPage() {
             </p>
             <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>
               {contact.notes || 'No notes yet.'}
-            </p>
-            <p className="casl-note" style={{ marginTop: '0.85rem' }}>
-              SMS STOP / ARRÊT applies when you send from a real SMS channel later. Keep consent
-              records for CASL.
             </p>
             <div className="actions" style={{ marginTop: '0.85rem' }}>
               {contact.email ? (
@@ -357,8 +346,15 @@ export function ContactDetailPage() {
       </div>
 
       {editing ? (
-        <div className="drawer-overlay" role="dialog" aria-modal="true">
-          <div className="drawer">
+        <div
+          className="drawer-overlay"
+          role="dialog"
+          aria-modal="true"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) setEditing(false);
+          }}
+        >
+          <div className="drawer" onMouseDown={(e) => e.stopPropagation()}>
             <h3>Edit contact</h3>
             <form
               className="form-grid"
@@ -414,8 +410,8 @@ export function ContactDetailPage() {
                     })
                   }
                 >
-                  <option value="CA">🇨🇦 Canada — use your 🇨🇦 phone line</option>
-                  <option value="US">🇺🇸 United States — use your 🇺🇸 phone line</option>
+                  <option value="CA">🇨🇦 Canada</option>
+                  <option value="US">🇺🇸 United States</option>
                 </select>
               </label>
               <label className="field">
@@ -424,21 +420,6 @@ export function ContactDetailPage() {
                   value={editForm.notes}
                   onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })}
                 />
-              </label>
-              <label className="check-row">
-                <input
-                  type="checkbox"
-                  checked={editForm.caslConsent}
-                  onChange={(e) =>
-                    setEditForm({ ...editForm, caslConsent: e.target.checked })
-                  }
-                />
-                <span>
-                  CASL consent on file
-                  <p className="casl-note">
-                    Honour STOP / ARRÊT when using real SMS later.
-                  </p>
-                </span>
               </label>
               <div className="actions">
                 <button type="submit" className="btn btn-primary">
@@ -458,8 +439,15 @@ export function ContactDetailPage() {
       ) : null}
 
       {scheduleOpen ? (
-        <div className="drawer-overlay" role="dialog" aria-modal="true">
-          <div className="drawer">
+        <div
+          className="drawer-overlay"
+          role="dialog"
+          aria-modal="true"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) setScheduleOpen(false);
+          }}
+        >
+          <div className="drawer" onMouseDown={(e) => e.stopPropagation()}>
             <h3>{editingItemId ? 'Edit scheduled item' : 'Schedule follow-up'}</h3>
             {!editingItemId ? (
               <label className="field" style={{ marginBottom: '0.75rem' }}>
@@ -483,15 +471,6 @@ export function ContactDetailPage() {
               className="form-grid"
               onSubmit={(e) => {
                 e.preventDefault();
-                if (!contact.caslConsent && schForm.channel !== 'call') {
-                  if (
-                    !window.confirm(
-                      'No CASL consent flagged for this contact. Schedule anyway?',
-                    )
-                  ) {
-                    return;
-                  }
-                }
                 const due = fromLocalInputValue(schForm.dueAt);
                 if (editingItemId) {
                   upsertScheduled({
