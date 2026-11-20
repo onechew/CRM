@@ -13,6 +13,20 @@ import {
 } from '../utils/drafts';
 
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const MONTHS = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+];
 
 function dayKey(d: Date) {
   const y = d.getFullYear();
@@ -31,6 +45,12 @@ function addMonths(d: Date, n: number) {
 
 function sameDay(a: string, b: string) {
   return a === b;
+}
+
+function yearOptions(around: number) {
+  const years: number[] = [];
+  for (let y = around - 5; y <= around + 5; y++) years.push(y);
+  return years;
 }
 
 export function SchedulePage() {
@@ -95,10 +115,16 @@ export function SchedulePage() {
 
   const selectedItems = byDay.get(selectedDay) ?? [];
   const todayKey = dayKey(new Date());
-  const monthLabel = monthCursor.toLocaleDateString('en-US', {
-    month: 'long',
-    year: 'numeric',
-  });
+  const years = useMemo(
+    () => yearOptions(Math.max(monthCursor.getFullYear(), new Date().getFullYear())),
+    [monthCursor],
+  );
+
+  const goToday = () => {
+    const now = new Date();
+    setMonthCursor(startOfMonth(now));
+    setSelectedDay(dayKey(now));
+  };
 
   const applyTemplate = (templateId: string, contactId: string) => {
     const tpl = state.templates.find((t) => t.id === templateId);
@@ -147,77 +173,126 @@ export function SchedulePage() {
       <div className="schedule-layout">
         <section className="panel calendar-panel" aria-label="Month calendar">
           <div className="calendar-toolbar">
-            <button
-              type="button"
-              className="btn btn-secondary btn-sm"
-              onClick={() => setMonthCursor((m) => addMonths(m, -1))}
-              aria-label="Previous month"
-            >
-              Prev
-            </button>
-            <h3 className="calendar-month-label">{monthLabel}</h3>
-            <button
-              type="button"
-              className="btn btn-secondary btn-sm"
-              onClick={() => setMonthCursor((m) => addMonths(m, 1))}
-              aria-label="Next month"
-            >
-              Next
-            </button>
-          </div>
-
-          <div className="calendar-weekdays">
-            {WEEKDAYS.map((d) => (
-              <div key={d} className="calendar-weekday">
-                {d}
-              </div>
-            ))}
-          </div>
-
-          <div className="calendar-grid">
-            {calendarCells.map((cell, i) => {
-              if (!cell) {
-                return <div key={`pad-${i}`} className="calendar-cell calendar-cell-pad" />;
-              }
-              const items = byDay.get(cell.key) ?? [];
-              const isSelected = sameDay(cell.key, selectedDay);
-              const isToday = sameDay(cell.key, todayKey);
-              return (
+            <div className="calendar-toolbar-left">
+              <button type="button" className="btn btn-secondary btn-sm" onClick={goToday}>
+                Today
+              </button>
+              <div className="calendar-nav-arrows" role="group" aria-label="Month navigation">
                 <button
-                  key={cell.key}
                   type="button"
-                  className={`calendar-cell${isSelected ? ' is-selected' : ''}${isToday ? ' is-today' : ''}`}
-                  onClick={() => setSelectedDay(cell.key)}
+                  className="btn btn-secondary btn-sm calendar-arrow"
+                  onClick={() => setMonthCursor((m) => addMonths(m, -1))}
+                  aria-label="Previous month"
                 >
-                  <span className="calendar-day-num">{cell.date.getDate()}</span>
-                  <div className="calendar-events">
-                    {items.slice(0, 3).map((item) => {
-                      const c = getContact(item.contactId);
-                      return (
-                        <span
-                          key={item.id}
-                          className={`calendar-event calendar-event-${item.channel}`}
-                          title={`${item.channel}: ${c?.name ?? 'Unknown'}`}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedDay(cell.key);
-                            setDetailItem(item);
-                          }}
-                        >
-                          <span className="calendar-event-channel">{item.channel}</span>
-                          <span className="calendar-event-name">
-                            {c?.name ?? 'Unknown'}
-                          </span>
-                        </span>
-                      );
-                    })}
-                    {items.length > 3 ? (
-                      <span className="calendar-more">+{items.length - 3} more</span>
-                    ) : null}
-                  </div>
+                  ‹
                 </button>
-              );
-            })}
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm calendar-arrow"
+                  onClick={() => setMonthCursor((m) => addMonths(m, 1))}
+                  aria-label="Next month"
+                >
+                  ›
+                </button>
+              </div>
+              <div className="calendar-pickers">
+                <label className="calendar-picker">
+                  <span className="visually-hidden">Month</span>
+                  <select
+                    value={monthCursor.getMonth()}
+                    aria-label="Month"
+                    onChange={(e) => {
+                      const month = Number(e.target.value);
+                      setMonthCursor(new Date(monthCursor.getFullYear(), month, 1));
+                    }}
+                  >
+                    {MONTHS.map((label, idx) => (
+                      <option key={label} value={idx}>
+                        {label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="calendar-picker">
+                  <span className="visually-hidden">Year</span>
+                  <select
+                    value={monthCursor.getFullYear()}
+                    aria-label="Year"
+                    onChange={(e) => {
+                      const year = Number(e.target.value);
+                      setMonthCursor(new Date(year, monthCursor.getMonth(), 1));
+                    }}
+                  >
+                    {years.map((y) => (
+                      <option key={y} value={y}>
+                        {y}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div className="calendar-sheet">
+            <div className="calendar-weekdays">
+              {WEEKDAYS.map((d) => (
+                <div key={d} className="calendar-weekday">
+                  {d}
+                </div>
+              ))}
+            </div>
+
+            <div className="calendar-grid">
+              {calendarCells.map((cell, i) => {
+                if (!cell) {
+                  return <div key={`pad-${i}`} className="calendar-cell calendar-cell-pad" />;
+                }
+                const items = byDay.get(cell.key) ?? [];
+                const isSelected = sameDay(cell.key, selectedDay);
+                const isToday = sameDay(cell.key, todayKey);
+                return (
+                  <button
+                    key={cell.key}
+                    type="button"
+                    className={`calendar-cell${isSelected ? ' is-selected' : ''}${isToday ? ' is-today' : ''}`}
+                    onClick={() => {
+                      setSelectedDay(cell.key);
+                      if (items.length === 0) openNew(cell.key);
+                    }}
+                  >
+                    <span className={`calendar-day-num${isToday ? ' is-today' : ''}`}>
+                      {cell.date.getDate()}
+                    </span>
+                    <div className="calendar-events">
+                      {items.slice(0, 3).map((item) => {
+                        const c = getContact(item.contactId);
+                        return (
+                          <span
+                            key={item.id}
+                            className={`calendar-event calendar-event-${item.channel}`}
+                            title={`${item.channel}: ${c?.name ?? 'Unknown'}`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedDay(cell.key);
+                              setDetailItem(item);
+                            }}
+                          >
+                            <span className="calendar-event-channel">{item.channel}</span>
+                            <span className="calendar-event-name">
+                              {c?.name ?? 'Unknown'}
+                            </span>
+                          </span>
+                        );
+                      })}
+                      {items.length > 3 ? (
+                        <span className="calendar-more">+{items.length - 3} more</span>
+                      ) : null}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </section>
 
