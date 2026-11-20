@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ownerPhoneForRegion, regionLabel } from '../data/owner';
+import { ownerPhoneForRegion, regionFlag, regionLabel } from '../data/owner';
 import type { Contact, MessageChannel, OwnerProfile } from '../types';
 import { copyText, mailtoHref, smsHref } from '../utils/drafts';
 import { Toast } from './Toast';
@@ -24,17 +24,17 @@ export function DraftActions({
 
   const fromLine = (
     <p className="draft-from-line">
-      Use your <strong>{line.label}</strong>
+      Use your <strong>{line.flag} line</strong>
       {line.phone ? (
         <>
           : <span className="mono">{line.phone}</span>
         </>
       ) : (
-        <> — add a US number in Profile first</>
+        <> — add a 🇺🇸 number in Profile first</>
       )}
       <span className="draft-from-meta">
         {' '}
-        (customer in {regionLabel(contact.region ?? 'CA')})
+        (customer {regionFlag(contact.region ?? 'CA')} {regionLabel(contact.region ?? 'CA')})
       </span>
     </p>
   );

@@ -1,18 +1,21 @@
-import { NavLink, Outlet } from 'react-router-dom';
+import { Link, NavLink, Outlet } from 'react-router-dom';
 import { useCrmContext } from '../context/CrmContext';
 
 export function Layout() {
-  const { unreadNotifications, todayItems } = useCrmContext();
+  const { state, unreadNotifications, todayItems } = useCrmContext();
   const todayCount = todayItems.length;
   const notifyCount = unreadNotifications.length;
+  const owner = state.owner;
 
   return (
     <div className="app-shell">
       <header className="topbar">
-        <div className="brand">
+        <Link to="/" className="brand" aria-label="Future Buildings — Today">
           <div className="brand-mark">Future Buildings</div>
-          <div className="brand-sub">Josh Schwartz · CRM</div>
-        </div>
+          <div className="brand-sub">
+            {owner.name} · {owner.company}
+          </div>
+        </Link>
         <nav className="nav-links" aria-label="Primary">
           <NavLink to="/" end className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
             Today

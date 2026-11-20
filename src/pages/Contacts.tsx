@@ -68,7 +68,9 @@ export function ContactsPage() {
                   </div>
                 </div>
                 <div className="actions">
-                  <span className="chip">{c.region === 'US' ? 'US' : 'CA'}</span>
+                  <span className="chip" title={c.region === 'US' ? 'United States' : 'Canada'}>
+                    {c.region === 'US' ? '🇺🇸' : '🇨🇦'}
+                  </span>
                   {c.caslConsent ? (
                     <span className="chip ok">Consent</span>
                   ) : (
@@ -144,8 +146,8 @@ export function ContactsPage() {
                     setForm({ ...form, region: e.target.value as ContactRegion })
                   }
                 >
-                  <option value="CA">Canada — use your CA phone line</option>
-                  <option value="US">United States — use your US phone line</option>
+                  <option value="CA">🇨🇦 Canada — use your 🇨🇦 phone line</option>
+                  <option value="US">🇺🇸 United States — use your 🇺🇸 phone line</option>
                 </select>
               </label>
               <label className="field">

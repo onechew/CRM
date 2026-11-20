@@ -13,7 +13,7 @@ export function SettingsPage() {
         <div>
           <h2>Your profile</h2>
           <p className="muted">
-            Send-from email and Canada / US phone lines. Customer region on each
+            Send-from email and 🇨🇦 / 🇺🇸 phone lines. Customer region on each
             contact picks which line to use for SMS and call drafts.
           </p>
         </div>
@@ -58,7 +58,7 @@ export function SettingsPage() {
           </label>
           <div className="form-grid two">
             <label className="field">
-              Canada phone
+              🇨🇦 Phone
               <input
                 required
                 inputMode="tel"
@@ -68,10 +68,10 @@ export function SettingsPage() {
               />
             </label>
             <label className="field">
-              US phone
+              🇺🇸 Phone
               <input
                 inputMode="tel"
-                placeholder="+1-XXX-XXX-XXXX (add your US line)"
+                placeholder="+1-XXX-XXX-XXXX (add your 🇺🇸 line)"
                 value={form.phoneUS}
                 onChange={(e) => setForm({ ...form, phoneUS: e.target.value })}
               />
@@ -79,8 +79,8 @@ export function SettingsPage() {
           </div>
           {!form.phoneUS.trim() ? (
             <p className="casl-note">
-              US number not set yet — contacts marked United States will prompt you
-              to add it here before SMS/call from-line hints are complete.
+              🇺🇸 number not set yet — contacts marked 🇺🇸 will prompt you to add it
+              here before SMS/call from-line hints are complete.
             </p>
           ) : null}
           <p className="casl-note">

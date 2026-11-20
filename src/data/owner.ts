@@ -9,21 +9,27 @@ export const OWNER_DEFAULTS: OwnerProfile = {
   phoneUS: '',
 };
 
+export function regionFlag(region: ContactRegion) {
+  return region === 'US' ? '🇺🇸' : '🇨🇦';
+}
+
 export function ownerPhoneForRegion(
   owner: OwnerProfile,
   region: ContactRegion,
-): { region: ContactRegion; phone: string; label: string } {
+): { region: ContactRegion; phone: string; label: string; flag: string } {
   if (region === 'US') {
     return {
       region: 'US',
       phone: owner.phoneUS.trim(),
       label: 'US line',
+      flag: '🇺🇸',
     };
   }
   return {
     region: 'CA',
     phone: owner.phoneCA.trim(),
     label: 'Canada line',
+    flag: '🇨🇦',
   };
 }
 

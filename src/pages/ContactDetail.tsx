@@ -106,7 +106,12 @@ export function ContactDetailPage() {
           <h2>{contact.name}</h2>
           <p className="muted" style={{ margin: 0 }}>
             {contact.company || 'No company'} ·{' '}
-            <span className="chip">{contact.region === 'US' ? 'US' : 'CA'}</span>{' '}
+            <span
+              className="chip"
+              title={contact.region === 'US' ? 'United States' : 'Canada'}
+            >
+              {contact.region === 'US' ? '🇺🇸' : '🇨🇦'}
+            </span>{' '}
             {contact.caslConsent ? (
               <span className="chip ok">CASL consent</span>
             ) : (
@@ -409,8 +414,8 @@ export function ContactDetailPage() {
                     })
                   }
                 >
-                  <option value="CA">Canada — use your CA phone line</option>
-                  <option value="US">United States — use your US phone line</option>
+                  <option value="CA">🇨🇦 Canada — use your 🇨🇦 phone line</option>
+                  <option value="US">🇺🇸 United States — use your 🇺🇸 phone line</option>
                 </select>
               </label>
               <label className="field">

@@ -52,10 +52,10 @@ export function TodayPage() {
           <div className="owner-strip-contacts">
             <a href={`mailto:${owner.email}`}>{owner.email}</a>
             <span aria-hidden="true">·</span>
-            <span title="Canada line">CA {owner.phoneCA || '—'}</span>
+            <span title="Canada line">🇨🇦 {owner.phoneCA || '—'}</span>
             <span aria-hidden="true">·</span>
             <span title="US line">
-              US {owner.phoneUS.trim() ? owner.phoneUS : 'not set'}
+              🇺🇸 {owner.phoneUS.trim() ? owner.phoneUS : 'not set'}
             </span>
             <Link className="owner-strip-edit" to="/settings">
               Edit
@@ -124,7 +124,9 @@ export function TodayPage() {
                       {overdue ? <span className="chip warn">Overdue</span> : (
                         <span className="chip">Today</span>
                       )}
-                      <span className="chip">{contact.region === 'US' ? 'US' : 'CA'}</span>
+                      <span className="chip" title={contact.region === 'US' ? 'United States' : 'Canada'}>
+                        {contact.region === 'US' ? '🇺🇸' : '🇨🇦'}
+                      </span>
                     </div>
                     <Link className="title" to={`/contacts/${contact.id}`}>
                       {contact.name}
