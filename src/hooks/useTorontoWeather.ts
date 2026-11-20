@@ -16,7 +16,7 @@ function weatherInfo(code: number): { label: string; icon: string } {
   if (code >= 80 && code <= 82) return { label: 'Showers', icon: '🌧️' };
   if (code >= 85 && code <= 86) return { label: 'Snow showers', icon: '🌨️' };
   if (code >= 95) return { label: 'Thunderstorm', icon: '⛈️' };
-  return { label: '—', icon: '🌡️' };
+  return { label: '-', icon: '🌡️' };
 }
 
 export function formatTorontoDate(date = new Date()) {
@@ -29,6 +29,14 @@ export function formatTorontoDate(date = new Date()) {
   }).format(date);
 }
 
+/** Force "AM" / "PM" (never a.m. / p.m.). */
+export function normalizeAmPm(raw: string) {
+  return raw
+    .replace(/\u202f|\u00a0/g, ' ')
+    .replace(/\s*a\.?\s*m\.?/gi, ' AM')
+    .replace(/\s*p\.?\s*m\.?/gi, ' PM');
+}
+
 export function formatTorontoTime(date = new Date()) {
   const raw = new Intl.DateTimeFormat('en-US', {
     timeZone: TZ,
@@ -36,10 +44,7 @@ export function formatTorontoTime(date = new Date()) {
     minute: '2-digit',
     hour12: true,
   }).format(date);
-  // en-US is already AM/PM; normalize any locale variants to uppercase AM/PM
-  return raw.replace(/\s*(a\.?m\.?|p\.?m\.?)/i, (_, mer) =>
-    /p/i.test(mer) ? ' PM' : ' AM',
-  );
+  return normalizeAmPm(raw);
 }
 
 export type TorontoWeather = {

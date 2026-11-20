@@ -79,12 +79,12 @@ export function SettingsPage() {
           </div>
           {!form.phoneUS.trim() ? (
             <p className="casl-note">
-              🇺🇸 number not set yet — contacts marked 🇺🇸 will prompt you to add it
+              🇺🇸 number not set yet. Contacts marked 🇺🇸 will prompt you to add it
               here before SMS/call from-line hints are complete.
             </p>
           ) : null}
           <p className="casl-note">
-            Drafts still open in your mail or Messages app — nothing auto-sends.
+            Drafts still open in your mail or Messages app. Nothing auto-sends.
           </p>
           <div className="actions">
             <button type="submit" className="btn btn-primary">

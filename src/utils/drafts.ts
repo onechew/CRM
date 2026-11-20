@@ -4,28 +4,35 @@ export function fillTemplate(
   text: string,
   contact: Pick<Contact, 'name' | 'company' | 'email' | 'phone'>,
 ) {
+  const first = contact.name.split(' ')[0] || contact.name;
   return text
-    .replaceAll('{{name}}', contact.name.split(' ')[0] || contact.name)
+    .replaceAll('[First name]', first)
+    .replaceAll('[Full name]', contact.name)
+    .replaceAll('[Company]', contact.company)
+    .replaceAll('[Email]', contact.email)
+    .replaceAll('[Phone]', contact.phone)
+    // legacy curly tokens still fill if present in old saved templates
+    .replaceAll('{{name}}', first)
     .replaceAll('{{fullName}}', contact.name)
     .replaceAll('{{company}}', contact.company)
     .replaceAll('{{email}}', contact.email)
     .replaceAll('{{phone}}', contact.phone);
 }
 
-/** Show plain labels instead of {{tokens}} for salespeople */
+/** Normalize any legacy {{tokens}} to readable brackets for display */
 export function formatTemplateForDisplay(text: string) {
   return text
-    .replaceAll('{{name}}', '[Customer first name]')
-    .replaceAll('{{fullName}}', '[Customer name]')
+    .replaceAll('{{name}}', '[First name]')
+    .replaceAll('{{fullName}}', '[Full name]')
     .replaceAll('{{company}}', '[Company]')
-    .replaceAll('{{email}}', '[Customer email]')
-    .replaceAll('{{phone}}', '[Customer phone]');
+    .replaceAll('{{email}}', '[Email]')
+    .replaceAll('{{phone}}', '[Phone]');
 }
 
 export const TEMPLATE_INSERTS = [
-  { label: 'Customer first name', token: '{{name}}' },
-  { label: 'Customer name', token: '{{fullName}}' },
-  { label: 'Company', token: '{{company}}' },
+  { label: 'First name', token: '[First name]' },
+  { label: 'Full name', token: '[Full name]' },
+  { label: 'Company', token: '[Company]' },
 ] as const;
 
 
@@ -37,7 +44,7 @@ export function mailtoHref(email: string, subject?: string, body?: string) {
   return `mailto:${encodeURIComponent(email)}${q ? `?${q}` : ''}`;
 }
 
-/** sms: URI — works on iOS/Android; body support varies by OS */
+/** sms: URI - works on iOS/Android; body support varies by OS */
 export function smsHref(phone: string, body?: string) {
   const cleaned = phone.replace(/[^\d+]/g, '');
   if (!body) return `sms:${cleaned}`;
@@ -46,6 +53,14 @@ export function smsHref(phone: string, body?: string) {
 
 export async function copyText(text: string) {
   await navigator.clipboard.writeText(text);
+}
+
+/** Force "AM" / "PM" (never a.m. / p.m.). */
+function normalizeAmPm(raw: string) {
+  return raw
+    .replace(/\u202f|\u00a0/g, ' ')
+    .replace(/\s*a\.?\s*m\.?/gi, ' AM')
+    .replace(/\s*p\.?\s*m\.?/gi, ' PM');
 }
 
 export function formatWhen(iso: string) {
@@ -58,9 +73,7 @@ export function formatWhen(iso: string) {
     minute: '2-digit',
     hour12: true,
   });
-  return raw.replace(/\s*(a\.?m\.?|p\.?m\.?)/i, (_, mer) =>
-    /p/i.test(mer) ? ' PM' : ' AM',
-  );
+  return normalizeAmPm(raw);
 }
 
 export function isOverdue(iso: string) {

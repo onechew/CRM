@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { v4 as uuid } from 'uuid';
+import { Modal } from '../components/Modal';
 import { Toast } from '../components/Toast';
 import { useCrmContext } from '../context/CrmContext';
 import {
@@ -57,7 +58,7 @@ export function SchedulePage() {
         <div>
           <h2>Schedule</h2>
           <p className="muted" style={{ margin: 0 }}>
-            Queue email drafts, SMS drafts, and call reminders — open or copy when due.
+            Queue email drafts, SMS drafts, and call reminders. Open or copy when due.
           </p>
         </div>
         <button
@@ -123,17 +124,7 @@ export function SchedulePage() {
         )}
       </div>
 
-      {open ? (
-        <div
-          className="drawer-overlay"
-          role="dialog"
-          aria-modal="true"
-          onMouseDown={(e) => {
-            if (e.target === e.currentTarget) setOpen(false);
-          }}
-        >
-          <div className="drawer" onMouseDown={(e) => e.stopPropagation()}>
-            <h3>Schedule follow-up</h3>
+      <Modal open={open} onClose={() => setOpen(false)} title="Schedule follow-up">
             <form
               className="form-grid"
               onSubmit={(e) => {
@@ -148,7 +139,7 @@ export function SchedulePage() {
                   const smsTpl = state.templates.find((t) => t.channel === 'sms');
                   const smsBody = fillTemplate(
                     smsTpl?.body ??
-                      `Hi {{name}}, Josh at Future Buildings checking in about {{company}}. Reply STOP to opt out.`,
+                      `Hi [First name], Josh at Future Buildings checking in about [Company].`,
                     contact,
                   );
                   upsertScheduled({
@@ -172,7 +163,7 @@ export function SchedulePage() {
                     contactId: contact.id,
                     channel: 'call',
                     sequenceId: seq,
-                    body: `Call ${contact.name}${contact.company ? ` (${contact.company})` : ''} — follow-up after email/SMS.`,
+                    body: `Call ${contact.name}${contact.company ? ` (${contact.company})` : ''} - follow-up after email/SMS.`,
                     dueAt: new Date(base + 4 * day).toISOString(),
                     status: 'pending',
                   });
@@ -207,7 +198,7 @@ export function SchedulePage() {
                   {contactsSorted.map((c) => (
                     <option key={c.id} value={c.id}>
                       {c.name}
-                      {c.company ? ` — ${c.company}` : ''}
+                      {c.company ? ` - ${c.company}` : ''}
                     </option>
                   ))}
                 </select>
@@ -224,7 +215,7 @@ export function SchedulePage() {
                     }
                   }}
                 >
-                  <option value="">— none —</option>
+                  <option value="">- none -</option>
                   {state.templates.map((t) => (
                     <option key={t.id} value={t.id}>
                       {t.name} ({t.channel})
@@ -297,9 +288,7 @@ export function SchedulePage() {
                 </button>
               </div>
             </form>
-          </div>
-        </div>
-      ) : null}
+      </Modal>
 
       <Toast message={toast} onDone={() => setToast(null)} />
     </div>

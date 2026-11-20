@@ -344,7 +344,7 @@ export function useCrm() {
           contactId,
           channel: channel === 'any' || channel === 'call' ? 'note' : channel,
           direction: 'inbound',
-          body: `Reply received — remaining auto follow-ups stopped.`,
+          body: `Reply received. Remaining auto follow-ups stopped.`,
           createdAt: now,
         };
 

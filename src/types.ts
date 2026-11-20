@@ -2,7 +2,7 @@ export type MessageChannel = 'email' | 'sms' | 'call';
 
 export type ScheduledStatus = 'pending' | 'due' | 'completed' | 'cancelled' | 'stopped';
 
-/** Customer location — picks which owner phone line to use for SMS/call drafts */
+/** Customer location - picks which owner phone line to use for SMS/call drafts */
 export type ContactRegion = 'CA' | 'US';
 
 export interface OwnerProfile {
@@ -22,7 +22,7 @@ export interface Contact {
   phone: string;
   email: string;
   notes: string;
-  /** Where the customer is — selects Josh's CA vs US line */
+  /** Where the customer is - selects Josh's CA vs US line */
   region: ContactRegion;
   /** CASL: express or implied consent to receive CEMs */
   caslConsent: boolean;

@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Modal } from '../components/Modal';
 import { useCrmContext } from '../context/CrmContext';
 import type { ContactRegion } from '../types';
 
@@ -25,7 +26,7 @@ export function ContactsPage() {
           <h2>Contacts</h2>
           <p className="muted" style={{ margin: 0 }}>
             {state.contacts.length === 0
-              ? 'No contacts yet — add your first real contact'
+              ? 'No contacts yet. Add your first real contact'
               : `${state.contacts.length} contact${state.contacts.length === 1 ? '' : 's'}`}
           </p>
         </div>
@@ -50,7 +51,7 @@ export function ContactsPage() {
             <strong>{q.trim() ? 'No matches' : 'No contacts yet'}</strong>
             {q.trim()
               ? 'Try a different name, company, email, or phone.'
-              : 'Add real contacts as you go — nothing is bulk-seeded.'}
+              : 'Add real contacts as you go. Nothing is bulk-seeded.'}
           </div>
         ) : (
           <ul className="list">
@@ -61,7 +62,7 @@ export function ContactsPage() {
                     {c.name}
                   </Link>
                   <div className="meta">
-                    {c.company || '—'}
+                    {c.company || '-'}
                     {c.email ? ` · ${c.email}` : ''}
                     {c.phone ? ` · ${c.phone}` : ''}
                   </div>
@@ -77,17 +78,7 @@ export function ContactsPage() {
         )}
       </div>
 
-      {showForm ? (
-        <div
-          className="drawer-overlay"
-          role="dialog"
-          aria-modal="true"
-          onMouseDown={(e) => {
-            if (e.target === e.currentTarget) setShowForm(false);
-          }}
-        >
-          <div className="drawer" onMouseDown={(e) => e.stopPropagation()}>
-            <h3>New contact</h3>
+      <Modal open={showForm} onClose={() => setShowForm(false)} title="New contact">
             <form
               className="form-grid"
               onSubmit={(e) => {
@@ -170,9 +161,7 @@ export function ContactsPage() {
                 </button>
               </div>
             </form>
-          </div>
-        </div>
-      ) : null}
+      </Modal>
     </div>
   );
 }

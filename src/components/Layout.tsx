@@ -13,7 +13,7 @@ export function Layout() {
         <Link
           to="/"
           className="brand"
-          aria-label="Go to Today — Future Buildings"
+          aria-label="Go to Today - Future Buildings"
           title="Go to Today"
         >
           <span className="brand-mark">Future Buildings</span>

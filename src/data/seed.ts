@@ -1,7 +1,7 @@
 import type { CrmState } from '../types';
 import { OWNER_DEFAULTS } from './owner';
 
-/** Fresh CRM — one labeled Example contact + schedule so the UI is demoable. */
+/** Fresh CRM: one labeled Example contact + schedule so the UI is demoable. */
 export function createSeedState(): CrmState {
   const now = Date.now();
   const iso = (offsetMs: number) => new Date(now + offsetMs).toISOString();
@@ -10,14 +10,14 @@ export function createSeedState(): CrmState {
   const templates = [
     {
       id: 'tpl-intro-email',
-      name: 'Intro — cladding capabilities',
+      name: 'Intro - cladding capabilities',
       channel: 'email' as const,
-      subject: 'Future Buildings — quick intro for {{company}}',
-      body: `Hi {{name}},
+      subject: 'Future Buildings - quick intro for [Company]',
+      body: `Hi [First name],
 
 Josh Schwartz here with Future Buildings Inc. We help builders with cladding and steel solutions that keep schedules tight.
 
-Happy to share a short capability sheet or walk a job with you — whatever is most useful.
+Happy to share a short capability sheet or walk a job with you, whatever is most useful.
 
 Best,
 Josh Schwartz
@@ -27,17 +27,17 @@ jschwartz@torosteel.com`,
     },
     {
       id: 'tpl-follow-sms',
-      name: 'Follow-up SMS — check-in',
+      name: 'Follow-up SMS - check-in',
       channel: 'sms' as const,
-      body: `Hi {{name}}, Josh at Future Buildings. Circling back on cladding for {{company}} — any questions I can answer? Reply STOP to opt out.`,
+      body: `Hi [First name], Josh at Future Buildings. Circling back on cladding for [Company]. Any questions I can answer?`,
       updatedAt: iso(0),
     },
     {
       id: 'tpl-quote-email',
       name: 'Quote ready',
       channel: 'email' as const,
-      subject: 'Quote ready — {{company}}',
-      body: `Hi {{name}},
+      subject: 'Quote ready - [Company]',
+      body: `Hi [First name],
 
 Your preliminary quote is ready. I can walk you through options and lead times whenever works.
 
@@ -59,7 +59,7 @@ Future Buildings Inc.`,
         phone: '+1-416-555-0100',
         email: 'example.contact@example-demo.dev',
         notes:
-          'Example only — safe to edit or delete. Region Canada uses your CA phone line for SMS/call drafts.',
+          'Example only. Safe to edit or delete. Region Canada uses your 🇨🇦 phone line for SMS/call drafts.',
         region: 'CA',
         caslConsent: true,
         createdAt: iso(-day),
@@ -72,7 +72,7 @@ Future Buildings Inc.`,
         contactId: exampleContactId,
         channel: 'note',
         direction: 'internal',
-        body: 'Example log entry — replace with real history as you work.',
+        body: 'Example log entry. Replace with real history as you work.',
         createdAt: iso(-day),
       },
     ],
@@ -83,7 +83,7 @@ Future Buildings Inc.`,
         contactId: exampleContactId,
         channel: 'email',
         sequenceId,
-        subject: 'Example — Future Buildings intro for Example Builder Co.',
+        subject: 'Example - Future Buildings intro for Example Builder Co.',
         body: `Hi Example,
 
 Josh Schwartz here with Future Buildings Inc. This is an example scheduled email draft so you can see Today and Schedule in action.

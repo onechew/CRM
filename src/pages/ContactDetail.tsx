@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { DraftActions } from '../components/DraftActions';
+import { Modal } from '../components/Modal';
 import { Toast } from '../components/Toast';
 import { useCrmContext } from '../context/CrmContext';
 import type { ContactRegion } from '../types';
@@ -138,7 +139,7 @@ export function ContactDetailPage() {
             className="btn btn-secondary"
             onClick={() => {
               markReplyReceived(contact.id);
-              setToast('Reply logged — remaining sequence stopped');
+              setToast('Reply logged. Remaining sequence stopped');
             }}
           >
             Mark reply received
@@ -151,10 +152,10 @@ export function ContactDetailPage() {
           <div className="panel panel-pad">
             <h3 style={{ fontSize: '1.05rem', marginBottom: '0.65rem' }}>Details</h3>
             <p className="meta" style={{ margin: '0 0 0.35rem' }}>
-              <span className="mono">{contact.email || '—'}</span>
+              <span className="mono">{contact.email || '-'}</span>
             </p>
             <p className="meta" style={{ margin: '0 0 0.65rem' }}>
-              <span className="mono">{contact.phone || '—'}</span>
+              <span className="mono">{contact.phone || '-'}</span>
             </p>
             <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>
               {contact.notes || 'No notes yet.'}
@@ -165,7 +166,7 @@ export function ContactDetailPage() {
                   contact={contact}
                   owner={owner}
                   channel="email"
-                  subject={`Following up — ${contact.company || contact.name}`}
+                  subject={`Following up: ${contact.company || contact.name}`}
                   body={`Hi ${contact.name.split(' ')[0]},\n\n`}
                 />
               ) : null}
@@ -225,7 +226,7 @@ export function ContactDetailPage() {
               </button>
             </form>
             {logs.length === 0 ? (
-              <div className="empty">No history yet — add a manual log entry.</div>
+              <div className="empty">No history yet. Add a manual log entry.</div>
             ) : (
               <ul className="list">
                 {logs.map((l) => (
@@ -345,17 +346,7 @@ export function ContactDetailPage() {
         </button>
       </div>
 
-      {editing ? (
-        <div
-          className="drawer-overlay"
-          role="dialog"
-          aria-modal="true"
-          onMouseDown={(e) => {
-            if (e.target === e.currentTarget) setEditing(false);
-          }}
-        >
-          <div className="drawer" onMouseDown={(e) => e.stopPropagation()}>
-            <h3>Edit contact</h3>
+      <Modal open={editing} onClose={() => setEditing(false)} title="Edit contact">
             <form
               className="form-grid"
               onSubmit={(e) => {
@@ -434,21 +425,13 @@ export function ContactDetailPage() {
                 </button>
               </div>
             </form>
-          </div>
-        </div>
-      ) : null}
+      </Modal>
 
-      {scheduleOpen ? (
-        <div
-          className="drawer-overlay"
-          role="dialog"
-          aria-modal="true"
-          onMouseDown={(e) => {
-            if (e.target === e.currentTarget) setScheduleOpen(false);
-          }}
-        >
-          <div className="drawer" onMouseDown={(e) => e.stopPropagation()}>
-            <h3>{editingItemId ? 'Edit scheduled item' : 'Schedule follow-up'}</h3>
+      <Modal
+        open={scheduleOpen}
+        onClose={() => setScheduleOpen(false)}
+        title={editingItemId ? 'Edit scheduled item' : 'Schedule follow-up'}
+      >
             {!editingItemId ? (
               <label className="field" style={{ marginBottom: '0.75rem' }}>
                 Start from template
@@ -458,7 +441,7 @@ export function ContactDetailPage() {
                     if (e.target.value) applyTemplate(e.target.value);
                   }}
                 >
-                  <option value="">— optional —</option>
+                  <option value="">- optional -</option>
                   {state.templates.map((t) => (
                     <option key={t.id} value={t.id}>
                       {t.name} ({t.channel})
@@ -490,7 +473,7 @@ export function ContactDetailPage() {
                   const day = 24 * 60 * 60 * 1000;
                   const smsBody = fillTemplate(
                     state.templates.find((t) => t.channel === 'sms')?.body ??
-                      `Hi {{name}}, Josh at Future Buildings checking in about {{company}}. Reply STOP to opt out.`,
+                      `Hi [First name], Josh at Future Buildings checking in about [Company].`,
                     contact,
                   );
                   upsertScheduled({
@@ -514,7 +497,7 @@ export function ContactDetailPage() {
                     contactId: contact.id,
                     channel: 'call',
                     sequenceId: seq,
-                    body: `Call ${contact.name}${contact.company ? ` (${contact.company})` : ''} — follow-up after email/SMS.`,
+                    body: `Call ${contact.name}${contact.company ? ` (${contact.company})` : ''} - follow-up after email/SMS.`,
                     dueAt: new Date(base + 4 * day).toISOString(),
                     status: 'pending',
                   });
@@ -601,9 +584,7 @@ export function ContactDetailPage() {
                 </button>
               </div>
             </form>
-          </div>
-        </div>
-      ) : null}
+      </Modal>
 
       <Toast message={toast} onDone={() => setToast(null)} />
     </div>

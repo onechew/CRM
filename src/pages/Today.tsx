@@ -39,7 +39,7 @@ export function TodayPage() {
         {weather.icon ?? '🌡️'}
       </span>
       <span>
-        {weather.tempC != null ? `${weather.tempC}°C` : '—'}
+        {weather.tempC != null ? `${weather.tempC}°C` : '-'}
         {weather.label ? ` · ${weather.label}` : ''}
       </span>
     </span>
@@ -56,20 +56,18 @@ export function TodayPage() {
           <span aria-hidden="true">·</span>
           {weatherNode}
         </p>
-        <div className="owner-strip" aria-label="Your send-from details">
-          <div className="owner-strip-contacts">
-            <a href={`mailto:${owner.email}`}>{owner.email}</a>
-            <span aria-hidden="true">·</span>
-            <span title="Canada line">🇨🇦 {owner.phoneCA || '—'}</span>
-            <span aria-hidden="true">·</span>
-            <span title="US line">
-              🇺🇸 {owner.phoneUS.trim() ? owner.phoneUS : 'not set'}
-            </span>
-            <Link className="owner-strip-edit" to="/settings">
-              Edit
-            </Link>
-          </div>
-        </div>
+        <p className="owner-strip owner-strip-contacts" aria-label="Your send-from details">
+          <a href={`mailto:${owner.email}`}>{owner.email}</a>
+          <span aria-hidden="true">·</span>
+          <span title="Canada line">🇨🇦 {owner.phoneCA || '-'}</span>
+          <span aria-hidden="true">·</span>
+          <span title="US line">
+            🇺🇸 {owner.phoneUS.trim() ? owner.phoneUS : 'not set'}
+          </span>
+          <Link className="owner-strip-edit" to="/settings">
+            Edit
+          </Link>
+        </p>
         <div className="hero-actions">
           <Link className="btn btn-primary" to="/contacts">
             Contacts
@@ -117,7 +115,7 @@ export function TodayPage() {
 
       <div className="panel">
         {todayItems.length === 0 ? (
-          <div className="empty">You are clear — schedule the next touch when ready.</div>
+          <div className="empty">You are clear. Schedule the next touch when ready.</div>
         ) : (
           <ul className="list">
             {todayItems.map((item) => {
@@ -125,7 +123,7 @@ export function TodayPage() {
               if (!contact) return null;
               const overdue = isOverdue(item.dueAt);
               return (
-                <li key={item.id} className="list-row">
+                <li key={item.id} className="list-row list-row-stack">
                   <div className="stack">
                     <div className="actions" style={{ gap: '0.4rem' }}>
                       <span className={`chip ${item.channel}`}>{item.channel}</span>
@@ -149,23 +147,25 @@ export function TodayPage() {
                       channel={item.channel}
                       subject={item.subject}
                       body={item.body}
+                      extra={
+                        <>
+                          <button
+                            type="button"
+                            className="btn btn-secondary btn-sm"
+                            onClick={() => completeScheduled(item.id)}
+                          >
+                            Mark done
+                          </button>
+                          <button
+                            type="button"
+                            className="btn btn-secondary btn-sm"
+                            onClick={() => cancelScheduled(item.id)}
+                          >
+                            Cancel
+                          </button>
+                        </>
+                      }
                     />
-                  </div>
-                  <div className="actions" style={{ flexDirection: 'column' }}>
-                    <button
-                      type="button"
-                      className="btn btn-secondary btn-sm"
-                      onClick={() => completeScheduled(item.id)}
-                    >
-                      Mark done
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn-ghost btn-sm"
-                      onClick={() => cancelScheduled(item.id)}
-                    >
-                      Cancel
-                    </button>
                   </div>
                 </li>
               );

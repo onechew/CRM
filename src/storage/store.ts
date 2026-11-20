@@ -23,6 +23,12 @@ function normalizeContact(c: Contact): Contact {
   };
 }
 
+/** Replace em/en dashes with a plain hyphen in saved copy. */
+function plainDashes(text: string | undefined): string | undefined {
+  if (text == null) return text;
+  return text.replace(/[—–]/g, '-');
+}
+
 function normalizeState(parsed: CrmState): CrmState {
   return {
     ...parsed,
@@ -31,8 +37,17 @@ function normalizeState(parsed: CrmState): CrmState {
       ? parsed.contacts.map((c) => normalizeContact(c as Contact))
       : [],
     logs: parsed.logs ?? [],
-    templates: parsed.templates ?? [],
-    scheduled: parsed.scheduled ?? [],
+    templates: (parsed.templates ?? []).map((t) => ({
+      ...t,
+      name: plainDashes(t.name) ?? t.name,
+      subject: plainDashes(t.subject),
+      body: plainDashes(t.body) ?? t.body,
+    })),
+    scheduled: (parsed.scheduled ?? []).map((s) => ({
+      ...s,
+      subject: plainDashes(s.subject),
+      body: plainDashes(s.body) ?? s.body,
+    })),
     notifications: parsed.notifications ?? [],
     seeded: true,
   };

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { ownerPhoneForRegion, regionFlag, regionLabel } from '../data/owner';
 import type { Contact, MessageChannel, OwnerProfile } from '../types';
 import { copyText, mailtoHref, smsHref } from '../utils/drafts';
@@ -11,6 +11,7 @@ export function DraftActions({
   subject,
   body,
   onLogged,
+  extra,
 }: {
   contact: Contact;
   owner: OwnerProfile;
@@ -18,6 +19,8 @@ export function DraftActions({
   subject?: string;
   body: string;
   onLogged?: () => void;
+  /** Extra buttons in the same bottom action row (primary + secondary only). */
+  extra?: ReactNode;
 }) {
   const [toast, setToast] = useState<string | null>(null);
   const line = ownerPhoneForRegion(owner, contact.region ?? 'CA');
@@ -30,7 +33,7 @@ export function DraftActions({
           : <span className="mono">{line.phone}</span>
         </>
       ) : (
-        <> — add a 🇺🇸 number in Profile first</>
+        <> - add a 🇺🇸 number in Profile first</>
       )}
       <span className="draft-from-meta">
         {' '}
@@ -66,6 +69,7 @@ export function DraftActions({
           >
             Copy note
           </button>
+          {extra}
           <Toast message={toast} onDone={() => setToast(null)} />
         </div>
       </div>
@@ -93,6 +97,7 @@ export function DraftActions({
         >
           Copy draft
         </button>
+        {extra}
         <Toast message={toast} onDone={() => setToast(null)} />
       </div>
     );
@@ -114,18 +119,19 @@ export function DraftActions({
           className="btn btn-secondary btn-sm"
           onClick={async () => {
             const text = line.phone
-              ? `${body}\n\n— send from your ${line.label} (${line.phone})`
+              ? `${body}\n\n- send from your ${line.label} (${line.phone})`
               : body;
             await copyText(text);
             setToast(
               line.phone
-                ? 'SMS draft copied — send from your matching line'
-                : 'SMS draft copied — set US number in Profile',
+                ? 'SMS draft copied. Send from your matching line'
+                : 'SMS draft copied. Set US number in Profile',
             );
           }}
         >
           Copy draft
         </button>
+        {extra}
         <Toast message={toast} onDone={() => setToast(null)} />
       </div>
     </div>
