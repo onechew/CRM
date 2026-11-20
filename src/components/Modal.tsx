@@ -1,16 +1,18 @@
 import type { ReactNode } from 'react';
 
-/** Backdrop click closes; content click does not. */
+/** Backdrop click closes; content click does not. Sticky footer optional. */
 export function Modal({
   open,
   onClose,
   title,
   children,
+  footer,
 }: {
   open: boolean;
   onClose: () => void;
   title?: string;
   children: ReactNode;
+  footer?: ReactNode;
 }) {
   if (!open) return null;
   return (
@@ -23,8 +25,13 @@ export function Modal({
       }}
     >
       <div className="drawer" onMouseDown={(e) => e.stopPropagation()}>
-        {title ? <h3>{title}</h3> : null}
-        {children}
+        {title ? (
+          <header className="drawer-header">
+            <h3>{title}</h3>
+          </header>
+        ) : null}
+        <div className="drawer-body">{children}</div>
+        {footer ? <footer className="drawer-footer">{footer}</footer> : null}
       </div>
     </div>
   );

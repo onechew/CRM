@@ -346,8 +346,27 @@ export function ContactDetailPage() {
         </button>
       </div>
 
-      <Modal open={editing} onClose={() => setEditing(false)} title="Edit contact">
+      <Modal
+        open={editing}
+        onClose={() => setEditing(false)}
+        title="Edit contact"
+        footer={
+          <div className="actions">
+            <button type="submit" form="contact-edit-form" className="btn btn-primary">
+              Save
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => setEditing(false)}
+            >
+              Cancel
+            </button>
+          </div>
+        }
+      >
             <form
+              id="contact-edit-form"
               className="form-grid"
               onSubmit={(e) => {
                 e.preventDefault();
@@ -412,18 +431,6 @@ export function ContactDetailPage() {
                   onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })}
                 />
               </label>
-              <div className="actions">
-                <button type="submit" className="btn btn-primary">
-                  Save
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-ghost"
-                  onClick={() => setEditing(false)}
-                >
-                  Cancel
-                </button>
-              </div>
             </form>
       </Modal>
 
@@ -431,6 +438,20 @@ export function ContactDetailPage() {
         open={scheduleOpen}
         onClose={() => setScheduleOpen(false)}
         title={editingItemId ? 'Edit scheduled item' : 'Schedule follow-up'}
+        footer={
+          <div className="actions">
+            <button type="submit" form="contact-schedule-form" className="btn btn-primary">
+              Save
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => setScheduleOpen(false)}
+            >
+              Cancel
+            </button>
+          </div>
+        }
       >
             {!editingItemId ? (
               <label className="field" style={{ marginBottom: '0.75rem' }}>
@@ -451,6 +472,7 @@ export function ContactDetailPage() {
               </label>
             ) : null}
             <form
+              id="contact-schedule-form"
               className="form-grid"
               onSubmit={(e) => {
                 e.preventDefault();
@@ -571,18 +593,6 @@ export function ContactDetailPage() {
                   </span>
                 </label>
               ) : null}
-              <div className="actions">
-                <button type="submit" className="btn btn-primary">
-                  Save
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-ghost"
-                  onClick={() => setScheduleOpen(false)}
-                >
-                  Cancel
-                </button>
-              </div>
             </form>
       </Modal>
 

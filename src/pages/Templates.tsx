@@ -168,8 +168,19 @@ export function TemplatesPage() {
         open={open}
         onClose={() => setOpen(false)}
         title={`${editingId ? 'Edit' : 'New'} ${form.channel === 'email' ? 'email' : 'SMS'} template`}
+        footer={
+          <div className="actions">
+            <button type="submit" form="template-form" className="btn btn-primary">
+              Save
+            </button>
+            <button type="button" className="btn btn-secondary" onClick={() => setOpen(false)}>
+              Cancel
+            </button>
+          </div>
+        }
       >
         <form
+          id="template-form"
           className="form-grid"
           onSubmit={(e) => {
             e.preventDefault();
@@ -229,14 +240,6 @@ export function TemplatesPage() {
               onChange={(e) => setForm({ ...form, body: e.target.value })}
             />
           </label>
-          <div className="actions">
-            <button type="submit" className="btn btn-primary">
-              Save
-            </button>
-            <button type="button" className="btn btn-ghost" onClick={() => setOpen(false)}>
-              Cancel
-            </button>
-          </div>
         </form>
       </Modal>
 

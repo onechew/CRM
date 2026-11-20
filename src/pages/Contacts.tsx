@@ -151,8 +151,27 @@ export function ContactsPage() {
         )}
       </div>
 
-      <Modal open={showForm} onClose={() => setShowForm(false)} title="New contact">
+      <Modal
+        open={showForm}
+        onClose={() => setShowForm(false)}
+        title="New contact"
+        footer={
+          <div className="actions">
+            <button type="submit" form="contact-new-form" className="btn btn-primary">
+              Save
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => setShowForm(false)}
+            >
+              Cancel
+            </button>
+          </div>
+        }
+      >
         <form
+          id="contact-new-form"
           className="form-grid"
           onSubmit={(e) => {
             e.preventDefault();
@@ -221,18 +240,6 @@ export function ContactsPage() {
               onChange={(e) => setForm({ ...form, notes: e.target.value })}
             />
           </label>
-          <div className="actions">
-            <button type="submit" className="btn btn-primary">
-              Save
-            </button>
-            <button
-              type="button"
-              className="btn btn-ghost"
-              onClick={() => setShowForm(false)}
-            >
-              Cancel
-            </button>
-          </div>
         </form>
       </Modal>
     </div>
