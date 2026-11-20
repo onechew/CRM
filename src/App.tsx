@@ -977,7 +977,7 @@ function ContactDetail({
   const navigate = useNavigate();
   const contact = data.contacts.find((item) => item.id === id);
   const [notes, setNotes] = useState(contact?.notes ?? "");
-  const [showFollowUp, setShowFollowUp] = useState(false);
+  const [scheduleChannel, setScheduleChannel] = useState<Channel | null>(null);
   const [showEdit, setShowEdit] = useState(false);
   const [editingNotes, setEditingNotes] = useState(false);
   const [selectedSchedule, setSelectedSchedule] = useState<FollowUp | null>(null);
@@ -1090,9 +1090,23 @@ function ContactDetail({
             <Icon name="check" />
             {contact.replied ? "Replied" : "Mark as replied"}
           </button>
-          <button className="button primary" onClick={() => setShowFollowUp(true)}>
-            <Icon name="plus" />
-            Add follow-up
+          <button
+            className="button primary"
+            title="Schedule an email follow-up"
+            disabled={!contact.email}
+            onClick={() => setScheduleChannel("email")}
+          >
+            <Icon name="mail" />
+            Schedule email
+          </button>
+          <button
+            className="button primary"
+            title="Schedule an SMS follow-up"
+            disabled={!contact.phone}
+            onClick={() => setScheduleChannel("sms")}
+          >
+            <Icon name="message" />
+            Schedule SMS
           </button>
         </div>
       </header>
@@ -1210,12 +1224,13 @@ function ContactDetail({
       {showEdit && (
         <ContactModal contact={contact} setData={setData} onClose={() => setShowEdit(false)} />
       )}
-      {showFollowUp && (
+      {scheduleChannel && (
         <FollowUpModal
+          channel={scheduleChannel}
           contact={contact}
           data={data}
           setData={setData}
-          onClose={() => setShowFollowUp(false)}
+          onClose={() => setScheduleChannel(null)}
         />
       )}
       {selectedSchedule && (
@@ -1928,80 +1943,47 @@ function ContactModal({
 }
 
 function FollowUpModal({
+  channel,
   contact,
   data,
   setData,
   onClose,
 }: {
+  channel: Channel;
   contact: Contact;
   data: CRMData;
   setData: React.Dispatch<React.SetStateAction<CRMData>>;
   onClose: () => void;
 }) {
-  const [includeEmail, setIncludeEmail] = useState(Boolean(contact.email));
-  const [includeSms, setIncludeSms] = useState(Boolean(contact.phone));
-  const [emailDate, setEmailDate] = useState(todayISO());
-  const [emailTime, setEmailTime] = useState(defaultDueTime());
-  const [smsDate, setSmsDate] = useState(todayISO());
-  const [smsTime, setSmsTime] = useState(defaultDueTime());
-  const emailTimeValid = !includeEmail || !isPastToronto(emailDate, emailTime);
-  const smsTimeValid = !includeSms || !isPastToronto(smsDate, smsTime);
-  const emailReady = !includeEmail || Boolean(contact.email);
-  const smsReady = !includeSms || Boolean(contact.phone);
-  const scheduleValid =
-    (includeEmail || includeSms) &&
-    emailTimeValid &&
-    smsTimeValid &&
-    emailReady &&
-    smsReady;
+  const isEmail = channel === "email";
+  const [date, setDate] = useState(todayISO());
+  const [time, setTime] = useState(defaultDueTime());
+  const contactReady = isEmail ? Boolean(contact.email) : Boolean(contact.phone);
+  const timeValid = !isPastToronto(date, time);
+  const scheduleValid = contactReady && timeValid;
   const save = () => {
     if (!scheduleValid) return;
-    const batchId =
-      includeEmail && includeSms ? crypto.randomUUID() : undefined;
     const ownerPhone = contact.region === "US" ? data.owner.usPhone : data.owner.caPhone;
     const companyReference = contact.company ? ` at ${contact.company}` : "";
     const emailDraft = `Hi ${contact.firstName},\n\nI’m following up from Future Buildings about your project${companyReference}. What would be a good time for a quick call?\n\nJosh Schwartz`;
     const callbackText = ownerPhone
       ? ` Reply here or call ${ownerPhone} when convenient.`
       : " Reply here when convenient.";
-    const scheduled: FollowUp[] = [];
-    if (includeEmail) {
-      scheduled.push({
-        id: crypto.randomUUID(),
-        contactId: contact.id,
-        channel: "email",
-        date: emailDate,
-        time: padTime(emailTime),
-        status: "pending",
-        subject: "Your Future Buildings project",
-        draft: emailDraft,
-        sequenceId: batchId,
-      });
-    }
-    if (includeSms) {
-      scheduled.push({
-        id: crypto.randomUUID(),
-        contactId: contact.id,
-        channel: "sms",
-        date: smsDate,
-        time: padTime(smsTime),
-        status: "pending",
-        subject: "",
-        draft: `Hi ${contact.firstName}, it’s ${data.owner.name} from ${data.owner.company}. I’m following up about your project${companyReference}.${callbackText}`,
-        sequenceId: batchId,
-      });
-    }
-    const historyParts = [
-      includeEmail ? "Email" : null,
-      includeSms ? "SMS" : null,
-    ].filter(Boolean);
-    const historyText =
-      historyParts.length === 2
-        ? "Email and SMS follow-ups scheduled."
-        : `${historyParts[0]} follow-up scheduled.`;
+    const followUp: FollowUp = {
+      id: crypto.randomUUID(),
+      contactId: contact.id,
+      channel,
+      date,
+      time: padTime(time),
+      status: "pending",
+      subject: isEmail ? "Your Future Buildings project" : "",
+      draft: isEmail
+        ? emailDraft
+        : `Hi ${contact.firstName}, it’s ${data.owner.name} from ${data.owner.company}. I’m following up about your project${companyReference}.${callbackText}`,
+    };
     setData((current) => ({
       ...current,
-      followUps: [...current.followUps, ...scheduled],
+      followUps: [...current.followUps, followUp],
       contacts: current.contacts.map((item) =>
         item.id === contact.id
           ? {
@@ -2012,7 +1994,7 @@ function FollowUpModal({
                 {
                   id: crypto.randomUUID(),
                   date: todayISO(),
-                  text: historyText,
+                  text: `${channelName(channel)} follow-up scheduled.`,
                 },
                 ...item.history,
               ],
@@ -2024,7 +2006,7 @@ function FollowUpModal({
   };
   return (
     <Modal
-      title="Schedule follow-ups"
+      title={isEmail ? "Schedule email" : "Schedule SMS"}
       eyebrow={`${contact.firstName} ${contact.lastName}`}
       onClose={onClose}
       footer={
@@ -2033,105 +2015,60 @@ function FollowUpModal({
             Cancel
           </button>
           <button className="button primary" disabled={!scheduleValid} onClick={save}>
-            Schedule follow-ups
+            {isEmail ? "Schedule email" : "Schedule SMS"}
           </button>
         </>
       }
     >
       <p className="schedule-explainer">
-        Choose email, SMS, or both. Each channel is scheduled on its own. These times create
-        reminders and prepared drafts. Messages are never sent automatically.
+        Pick a date and time when you are ready. This creates a reminder and a prepared draft.
+        Messages are never sent automatically.
       </p>
-      <div className={`channel-schedule email-schedule ${includeEmail ? "" : "is-disabled"}`}>
+      <div className={`channel-schedule ${isEmail ? "email-schedule" : "sms-schedule"}`}>
         <div className="channel-schedule-title">
-          <label className="channel-include">
-            <input
-              type="checkbox"
-              checked={includeEmail}
-              onChange={(event) => setIncludeEmail(event.target.checked)}
-            />
-            <span className="channel-icon">
-              <Icon name="mail" />
-            </span>
-            <span>
-              <strong>Email</strong>
-              <small>Optional. Schedule independently of SMS.</small>
-            </span>
-          </label>
+          <span className={`channel-icon ${isEmail ? "" : "sms"}`}>
+            <Icon name={isEmail ? "mail" : "message"} />
+          </span>
+          <div>
+            <strong>{isEmail ? "Email" : "SMS"}</strong>
+            <small>
+              {isEmail
+                ? "Scheduled separately from SMS."
+                : "Scheduled separately from email."}
+            </small>
+          </div>
         </div>
         <div className="form-grid two">
           <Field label="Date">
             <input
               type="date"
               min={todayISO()}
-              value={emailDate}
-              disabled={!includeEmail}
-              onChange={(event) => setEmailDate(event.target.value)}
+              value={date}
+              onChange={(event) => setDate(event.target.value)}
             />
           </Field>
           <Field label="Time">
             <input
               type="time"
-              value={emailTime}
-              disabled={!includeEmail}
-              onChange={(event) => setEmailTime(event.target.value)}
+              value={time}
+              onChange={(event) => setTime(event.target.value)}
             />
           </Field>
         </div>
       </div>
-      <div className={`channel-schedule sms-schedule ${includeSms ? "" : "is-disabled"}`}>
-        <div className="channel-schedule-title">
-          <label className="channel-include">
-            <input
-              type="checkbox"
-              checked={includeSms}
-              onChange={(event) => setIncludeSms(event.target.checked)}
-            />
-            <span className="channel-icon sms">
-              <Icon name="message" />
-            </span>
-            <span>
-              <strong>SMS</strong>
-              <small>Optional. Schedule independently of email.</small>
-            </span>
-          </label>
-        </div>
-        <div className="form-grid two">
-          <Field label="Date">
-            <input
-              type="date"
-              min={todayISO()}
-              value={smsDate}
-              disabled={!includeSms}
-              onChange={(event) => setSmsDate(event.target.value)}
-            />
-          </Field>
-          <Field label="Time">
-            <input
-              type="time"
-              value={smsTime}
-              disabled={!includeSms}
-              onChange={(event) => setSmsTime(event.target.value)}
-            />
-          </Field>
-        </div>
-      </div>
-      {!includeEmail && !includeSms && (
-        <p className="form-error">Select at least one channel to schedule.</p>
+      {!timeValid && (
+        <p className="form-error">
+          {isEmail ? "Email" : "SMS"} must be scheduled in the future.
+        </p>
       )}
-      {includeEmail && !emailTimeValid && (
-        <p className="form-error">Email must be scheduled in the future.</p>
+      {!contactReady && (
+        <p className="form-error">
+          {isEmail
+            ? "Add an email address to this contact first."
+            : "Add a phone number to this contact first."}
+        </p>
       )}
-      {includeSms && !smsTimeValid && (
-        <p className="form-error">SMS must be scheduled in the future.</p>
-      )}
-      {includeEmail && !emailReady && (
-        <p className="form-error">Add an email address to this contact first.</p>
-      )}
-      {includeSms && !smsReady && (
-        <p className="form-error">Add a phone number to this contact first.</p>
-      )}
-      {includeSms && (
+      {!isEmail && (
         <p className="line-preview">
           Draft callback number: {contact.region === "CA" ? "🇨🇦" : "🇺🇸"}{" "}
           {contact.region === "CA" ? data.owner.caPhone : data.owner.usPhone || "not set"}
@@ -2208,7 +2145,7 @@ function NewScheduleModal({
   };
   return (
     <Modal
-      title="New follow-up"
+      title="Schedule follow-up"
       eyebrow={formatDate(date)}
       onClose={onClose}
       footer={
@@ -2217,11 +2154,14 @@ function NewScheduleModal({
             Cancel
           </button>
           <button className="button primary" disabled={!formValid} onClick={save}>
-            Save follow-up
+            Schedule {form.channel === "email" ? "email" : "SMS"}
           </button>
         </>
       }
     >
+      <p className="schedule-explainer">
+        Schedule one email or one SMS at a time. Channels stay independent.
+      </p>
       <div className="form-grid two">
         <Field label="Contact">
           <select
@@ -2237,7 +2177,7 @@ function NewScheduleModal({
             ))}
           </select>
         </Field>
-        <Field label="Type">
+        <Field label="Channel">
           <select
             value={form.channel}
             onChange={(event) => setForm({ ...form, channel: event.target.value as Channel })}
