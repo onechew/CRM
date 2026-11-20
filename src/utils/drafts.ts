@@ -12,6 +12,23 @@ export function fillTemplate(
     .replaceAll('{{phone}}', contact.phone);
 }
 
+/** Show plain labels instead of {{tokens}} for salespeople */
+export function formatTemplateForDisplay(text: string) {
+  return text
+    .replaceAll('{{name}}', '[Customer first name]')
+    .replaceAll('{{fullName}}', '[Customer name]')
+    .replaceAll('{{company}}', '[Company]')
+    .replaceAll('{{email}}', '[Customer email]')
+    .replaceAll('{{phone}}', '[Customer phone]');
+}
+
+export const TEMPLATE_INSERTS = [
+  { label: 'Customer first name', token: '{{name}}' },
+  { label: 'Customer name', token: '{{fullName}}' },
+  { label: 'Company', token: '{{company}}' },
+] as const;
+
+
 export function mailtoHref(email: string, subject?: string, body?: string) {
   const params = new URLSearchParams();
   if (subject) params.set('subject', subject);
