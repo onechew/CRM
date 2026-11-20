@@ -13,13 +13,11 @@ export function Layout() {
         <Link
           to="/"
           className="brand"
-          aria-label="Go to Today - Future Buildings"
+          aria-label="Go to Today - Future Buildings Inc."
           title="Go to Today"
         >
-          <span className="brand-mark">Future Buildings</span>
-          <span className="brand-sub">
-            {owner.name} · {owner.company}
-          </span>
+          <span className="brand-mark">Future Buildings Inc.</span>
+          <span className="brand-sub">{owner.name} · Sales Rep</span>
         </Link>
         <nav className="nav-links" aria-label="Primary">
           <NavLink to="/" end className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
