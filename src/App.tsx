@@ -113,11 +113,37 @@ const defaultDueTime = () => {
   return padTime(`${future.hour}:${future.minute}`);
 };
 
-const isPastToronto = (date: string, time: string) => {
-  const now = getTorontoParts();
+const isPastToronto = (date: string, time: string, at = new Date()) => {
+  const now = getTorontoParts(at);
   const currentKey = `${now.year}-${now.month}-${now.day}T${padTime(`${now.hour}:${now.minute}`)}`;
   return `${date}T${padTime(time)}` < currentKey;
 };
+
+/** Keeps overdue labels fresh without a backend or paid messaging APIs. */
+function useNowTick(intervalMs = 30000) {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const tick = () => setNow(Date.now());
+    const id = window.setInterval(tick, intervalMs);
+    const onFocus = () => tick();
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") tick();
+    };
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.clearInterval(id);
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [intervalMs]);
+  return now;
+}
+
+const draftActionLabel = (channel: Channel) =>
+  channel === "sms" ? "Open SMS draft" : "Open email draft";
+const DRAFT_ONLY_NOTE =
+  "Reminders only. Messages are never sent automatically. Open a draft in your phone or email app.";
 
 const smsHref = (phone: string, body: string) => {
   const digits = phone.replace(/[^\d+]/g, "");
@@ -635,15 +661,21 @@ function Today({
   setData: React.Dispatch<React.SetStateAction<CRMData>>;
 }) {
   const navigate = useNavigate();
+  const nowTick = useNowTick(30000);
+  const clock = new Date(nowTick);
   const due = data.followUps
     .filter((item) => item.status === "pending" && item.date <= todayISO())
-    .sort((a, b) => `${a.date}${a.time}`.localeCompare(`${b.date}${b.time}`));
+    .sort((a, b) =>
+      `${a.date}T${padTime(a.time)}`.localeCompare(`${b.date}T${padTime(b.time)}`),
+    );
   const pending = data.followUps
     .filter((item) => item.status === "pending")
-    .sort((a, b) => `${a.date}${a.time}`.localeCompare(`${b.date}${b.time}`));
+    .sort((a, b) =>
+      `${a.date}T${padTime(a.time)}`.localeCompare(`${b.date}T${padTime(b.time)}`),
+    );
   const upcoming = pending.filter((item) => item.date > todayISO());
   const visibleFollowUps = due.length ? due : upcoming.slice(0, 1);
-  const isOverdue = (item: FollowUp) => isPastToronto(item.date, item.time);
+  const isOverdue = (item: FollowUp) => isPastToronto(item.date, item.time, clock);
   const overdueCount = due.filter(isOverdue).length;
 
   const updateStatus = (id: string, status: FollowUp["status"]) => {
@@ -774,14 +806,15 @@ function Today({
                     </div>
                   </div>
                   <p className="draft-text">{item.draft}</p>
+                  <p className="draft-only-note">{DRAFT_ONLY_NOTE}</p>
                   <div className="card-actions">
                     <button
                       className="button primary"
                       disabled={!canOpen}
                       onClick={() => openDraft(item, contact)}
                     >
-                      <Icon name="arrow" />
-                      Open
+                      <Icon name={item.channel === "sms" ? "message" : "mail"} />
+                      {draftActionLabel(item.channel)}
                     </button>
                     <button className="button" onClick={() => void copyText(item.draft)}>
                       <Icon name="copy" />
@@ -981,6 +1014,8 @@ function ContactDetail({
   const [showEdit, setShowEdit] = useState(false);
   const [editingNotes, setEditingNotes] = useState(false);
   const [selectedSchedule, setSelectedSchedule] = useState<FollowUp | null>(null);
+  const nowTick = useNowTick(30000);
+  const clock = new Date(nowTick);
   useEffect(() => setNotes(contact?.notes ?? ""), [contact?.notes]);
   if (!contact)
     return (
@@ -1169,7 +1204,7 @@ function ContactDetail({
           <div className="section-heading">
             <div>
               <h2>Follow-ups</h2>
-              <p>Click an item to preview its message.</p>
+              <p>Reminders only. Open a draft when you are ready to send.</p>
             </div>
             {schedules.some((item) => item.status === "pending") && (
               <button className="button danger" onClick={cancelSequence}>
@@ -1177,27 +1212,39 @@ function ContactDetail({
               </button>
             )}
           </div>
+          <p className="draft-only-note follow-ups-note">{DRAFT_ONLY_NOTE}</p>
           <div className="compact-list">
-            {schedules.map((item) => (
-              <button
-                className="compact-item"
-                key={item.id}
-                onClick={() => setSelectedSchedule(item)}
-              >
-                <span className={`channel-icon ${item.channel}`}>
-                  <Icon name={item.channel === "email" ? "mail" : "message"} />
-                </span>
-                <span>
-                  <strong>{channelName(item.channel)}</strong>
-                  <small>
-                    {formatDate(item.date)} · {formatTime(item.time)}
-                  </small>
-                </span>
-                <span className={`status ${item.status}`}>
-                  {item.status === "pending" ? "Upcoming" : capitalize(item.status)}
-                </span>
-              </button>
-            ))}
+            {schedules.map((item) => {
+              const overdue =
+                item.status === "pending" && isPastToronto(item.date, item.time, clock);
+              return (
+                <button
+                  className={`compact-item ${overdue ? "is-overdue" : ""}`}
+                  key={item.id}
+                  onClick={() => setSelectedSchedule(item)}
+                >
+                  <span className={`channel-icon ${item.channel}`}>
+                    <Icon name={item.channel === "email" ? "mail" : "message"} />
+                  </span>
+                  <span>
+                    <strong>{channelName(item.channel)}</strong>
+                    <small>
+                      {formatDate(item.date)} · {formatTime(item.time)}
+                      {overdue ? " · Open draft to send" : ""}
+                    </small>
+                  </span>
+                  <span
+                    className={`status ${item.status}${overdue ? " overdue" : ""}`}
+                  >
+                    {item.status === "pending"
+                      ? overdue
+                        ? "Overdue"
+                        : "Upcoming"
+                      : capitalize(item.status)}
+                  </span>
+                </button>
+              );
+            })}
             {!schedules.length && <p className="muted">No follow-ups scheduled.</p>}
           </div>
         </section>
@@ -2020,10 +2067,7 @@ function FollowUpModal({
         </>
       }
     >
-      <p className="schedule-explainer">
-        Pick a date and time when you are ready. This creates a reminder and a prepared draft.
-        Messages are never sent automatically.
-      </p>
+      <p className="schedule-explainer">{DRAFT_ONLY_NOTE}</p>
       <div className={`channel-schedule ${isEmail ? "email-schedule" : "sms-schedule"}`}>
         <div className="channel-schedule-title">
           <span className={`channel-icon ${isEmail ? "" : "sms"}`}>
@@ -2160,7 +2204,7 @@ function NewScheduleModal({
       }
     >
       <p className="schedule-explainer">
-        Schedule one email or one SMS at a time. Channels stay independent.
+        Schedule one email or one SMS at a time. Channels stay independent. {DRAFT_ONLY_NOTE}
       </p>
       <div className="form-grid two">
         <Field label="Contact">
@@ -2334,11 +2378,14 @@ function EventModal({
   onClose: () => void;
 }) {
   const navigate = useNavigate();
+  const nowTick = useNowTick(30000);
   const [form, setForm] = useState(event);
   const [isEditing, setIsEditing] = useState(false);
   const canOpenDraft = Boolean(
     contact && (event.channel === "email" ? contact.email : contact.phone),
   );
+  const overdue =
+    event.status === "pending" && isPastToronto(form.date, form.time, new Date(nowTick));
   const update = (status: FollowUp["status"]) => {
     setData((current) => ({
       ...current,
@@ -2411,7 +2458,7 @@ function EventModal({
       </button>
       {canOpenDraft && contact && (
         <button className="button primary" onClick={() => openDraft(form, contact)}>
-          Open draft
+          {draftActionLabel(event.channel)}
         </button>
       )}
     </>
@@ -2419,10 +2466,11 @@ function EventModal({
   return (
     <Modal
       title={`${formatDate(form.date)} at ${formatTime(form.time)}`}
-      eyebrow={`${channelName(event.channel)} follow-up`}
+      eyebrow={`${channelName(event.channel)} follow-up${overdue ? " · Overdue" : ""}`}
       onClose={onClose}
       footer={footer}
     >
+      <p className="draft-only-note">{DRAFT_ONLY_NOTE}</p>
       <div className="event-recipient">
         <div>
           <strong>

@@ -849,6 +849,26 @@ td:last-child {
   background: #eee7e4;
   color: #7a5142;
 }
+.status.overdue {
+  background: #fee7e2;
+  color: #a13622;
+}
+.draft-only-note {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+.due-card .draft-only-note {
+  margin: -4px 0 12px;
+}
+.follow-ups-note {
+  margin-top: -4px;
+}
+.compact-item.is-overdue .status.overdue {
+  background: #fee7e2;
+  color: #a13622;
+}
 .history-section {
   margin-top: 34px;
 }
