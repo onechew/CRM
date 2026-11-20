@@ -589,6 +589,133 @@ h3 {
   color: var(--steel);
 }
 
+.contacts-panel {
+  overflow: hidden;
+}
+
+.contacts-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.contacts-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.contacts-table th,
+.contacts-table td {
+  padding: 0.85rem 1rem;
+  text-align: left;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--line);
+}
+
+.contacts-table th {
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--slate);
+  background: rgba(63, 111, 146, 0.05);
+  white-space: nowrap;
+}
+
+.contacts-table th:nth-child(1),
+.contacts-table td:nth-child(1) {
+  width: 22%;
+}
+
+.contacts-table th:nth-child(2),
+.contacts-table td:nth-child(2) {
+  width: 20%;
+}
+
+.contacts-table th:nth-child(3),
+.contacts-table td:nth-child(3) {
+  width: 18%;
+}
+
+.contacts-table th:nth-child(4),
+.contacts-table td:nth-child(4) {
+  width: 28%;
+}
+
+.contacts-table th:nth-child(5),
+.contacts-table td:nth-child(5) {
+  width: 12%;
+}
+
+.contacts-table td {
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.contacts-name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-base) !important;
+  color: var(--ink) !important;
+  letter-spacing: -0.015em;
+}
+
+.contacts-row {
+  cursor: pointer;
+  transition: background 140ms ease;
+}
+
+.contacts-row:hover {
+  background: rgba(63, 111, 146, 0.1);
+}
+
+.contacts-row:hover .contacts-name {
+  color: var(--steel) !important;
+}
+
+.contacts-row:focus-visible {
+  outline: 2px solid var(--steel);
+  outline-offset: -2px;
+  background: rgba(63, 111, 146, 0.1);
+}
+
+.contacts-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.contacts-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  padding: 0.85rem 1rem;
+  border-top: 1px solid var(--line);
+  background: rgba(63, 111, 146, 0.03);
+}
+
+.contacts-page-meta {
+  margin: 0;
+}
+
+.contacts-page-indicator {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--ink-soft);
+  min-width: 6.5rem;
+  text-align: center;
+}
+
+@media (max-width: 720px) {
+  .contacts-table {
+    table-layout: auto;
+    min-width: 40rem;
+  }
+}
+
 .meta {
   font-size: var(--text-sm);
   font-weight: 450;
