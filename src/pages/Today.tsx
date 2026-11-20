@@ -10,12 +10,6 @@ import {
 import { copyText, formatWhen, isOverdue, mailtoHref, smsHref } from '../utils/drafts';
 import { Toast } from '../components/Toast';
 
-function previewText(body: string, max = 140) {
-  const flat = body.replace(/\s+/g, ' ').trim();
-  if (flat.length <= max) return flat;
-  return `${flat.slice(0, max - 1).trimEnd()}…`;
-}
-
 export function TodayPage() {
   const {
     state,
@@ -188,7 +182,7 @@ export function TodayPage() {
                   {contact.company ? ` · ${contact.company}` : ''}
                 </Link>
                 {item.subject ? <div className="task-card-subject">{item.subject}</div> : null}
-                <p className="task-card-preview">{previewText(item.body)}</p>
+                <p className="task-card-body">{item.body}</p>
                 <div className="task-card-actions">
                   <button
                     type="button"

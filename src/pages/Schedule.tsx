@@ -343,6 +343,7 @@ export function SchedulePage() {
                         </div>
                         <div className="meta">{formatWhen(s.dueAt)}</div>
                         {s.subject ? <div className="meta">{s.subject}</div> : null}
+                        <p className="task-card-body schedule-day-body">{s.body}</p>
                       </div>
                     </button>
                   </li>
