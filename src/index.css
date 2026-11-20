@@ -1,8 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Source+Code+Pro:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
 
 /*
   Future Buildings CRM — product UI
-  Typography: Manrope (brand/display) + Source Sans 3 (UI body)
+  Typography: single family — Source Sans 3 (weights for hierarchy)
   Patterns: clear hierarchy, 44px touch targets, high-contrast text,
   contacts / messages / reminders first — not a busy dashboard.
 */
@@ -28,9 +28,9 @@
   --shadow-sm: 0 2px 8px rgba(15, 20, 25, 0.06);
   --radius: 12px;
   --radius-lg: 18px;
-  --font-display: 'Manrope', sans-serif;
+  --font-display: 'Source Sans 3', sans-serif;
   --font-body: 'Source Sans 3', sans-serif;
-  --font-mono: 'Source Code Pro', ui-monospace, monospace;
+  --font-mono: 'Source Sans 3', ui-monospace, monospace;
   --text-xs: 0.8125rem;
   --text-sm: 0.9375rem;
   --text-base: 1.0625rem;
@@ -246,7 +246,7 @@ h3 {
   position: relative;
   overflow: hidden;
   border-radius: var(--radius-lg);
-  padding: clamp(1.75rem, 4.5vw, 3.25rem);
+  padding: clamp(1.25rem, 3vw, 1.75rem) clamp(1.25rem, 3.5vw, 2rem);
   margin-bottom: var(--space-5);
   color: var(--paper);
   background:
@@ -269,75 +269,38 @@ h3 {
 .hero-brand {
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: var(--text-xl);
+  font-size: clamp(1.55rem, 3.8vw, 2.15rem);
   letter-spacing: var(--tracking-display);
   line-height: var(--leading-tight);
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.2rem;
   position: relative;
   z-index: 1;
 }
 
-.hero h1 {
-  font-family: var(--font-display);
-  font-size: clamp(1.15rem, 2.4vw, 1.4rem);
-  font-weight: 600;
-  letter-spacing: -0.015em;
-  line-height: var(--leading-snug);
-  color: rgba(245, 248, 251, 0.92);
-  max-width: 32ch;
+.hero-owner-name {
   position: relative;
   z-index: 1;
-}
-
-.hero p {
-  margin: 0.85rem 0 0;
-  max-width: 40ch;
+  margin: 0 0 0.75rem;
   font-size: var(--text-sm);
-  font-weight: 400;
-  line-height: var(--leading-body);
+  font-weight: 600;
   letter-spacing: 0.01em;
-  color: rgba(231, 238, 245, 0.78);
-  position: relative;
-  z-index: 1;
+  line-height: var(--leading-snug);
+  color: rgba(231, 238, 245, 0.82);
 }
 
-.hero-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.65rem;
-  margin-top: 1.5rem;
-  position: relative;
-  z-index: 1;
+.hero-compact .owner-strip {
+  margin-top: 0;
 }
 
 .owner-strip {
   position: relative;
   z-index: 1;
-  margin-top: 1.15rem;
-  padding: 0.85rem 1rem;
-  border-radius: 12px;
+  padding: 0.65rem 0.85rem;
+  border-radius: 10px;
   background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(245, 248, 251, 0.16);
+  border: 1px solid rgba(245, 248, 251, 0.14);
   display: grid;
-  gap: 0.35rem;
-}
-
-.owner-strip-label {
-  display: block;
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: rgba(245, 248, 251, 0.55);
-  margin-bottom: 0.15rem;
-}
-
-.owner-strip strong {
-  font-family: var(--font-display);
-  font-size: var(--text-sm);
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  color: rgba(245, 248, 251, 0.96);
+  gap: 0.25rem;
 }
 
 .owner-strip-contacts {
@@ -593,23 +556,61 @@ h3 {
 
 .btn-primary {
   background: var(--ink);
-  color: var(--paper);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08) inset;
+  color: #fff;
+  border-color: var(--ink);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.1) inset;
 }
 
 .btn-primary:hover {
   background: #1a222c;
+  border-color: #1a222c;
+  color: #fff;
 }
 
 .btn-secondary {
-  background: var(--surface-solid);
-  border-color: var(--line-strong);
+  background: #fff;
+  border-color: rgba(15, 20, 25, 0.28);
   color: var(--ink);
 }
 
 .btn-secondary:hover {
   border-color: var(--steel);
   background: #fff;
+  color: var(--ink);
+}
+
+/* Dark hero: never dark-on-dark — primary = solid light, secondary = light outline */
+.hero .btn-primary {
+  background: #f5f8fb;
+  border-color: #f5f8fb;
+  color: #0f1419;
+}
+
+.hero .btn-primary:hover {
+  background: #fff;
+  border-color: #fff;
+  color: #0f1419;
+}
+
+.hero .btn-secondary {
+  background: transparent;
+  border-color: rgba(245, 248, 251, 0.85);
+  color: #f5f8fb;
+}
+
+.hero .btn-secondary:hover {
+  background: rgba(245, 248, 251, 0.12);
+  border-color: #fff;
+  color: #fff;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: 0.85rem;
+  position: relative;
+  z-index: 1;
 }
 
 .btn-ghost {
@@ -899,6 +900,44 @@ label.field select:focus {
 .drawer h3 {
   font-size: var(--text-lg);
   margin-bottom: var(--space-4);
+}
+
+.draft-from-line {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: var(--leading-snug);
+  color: var(--ink-soft);
+}
+
+.draft-from-meta {
+  color: var(--slate);
+  font-weight: 400;
+}
+
+.template-split {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 860px) {
+  .template-split {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+}
+
+.template-col-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--line);
+}
+
+.template-col-head h3 {
+  font-size: var(--text-md);
 }
 
 @media (prefers-reduced-motion: reduce) {

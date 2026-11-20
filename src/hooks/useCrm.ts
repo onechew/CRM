@@ -6,6 +6,7 @@ import type {
   Contact,
   CrmState,
   MessageChannel,
+  OwnerProfile,
   ScheduledItem,
   Template,
 } from '../types';
@@ -56,6 +57,7 @@ export function useCrm() {
   const upsertContact = useCallback(
     (input: Omit<Contact, 'id' | 'createdAt' | 'updatedAt'> & { id?: string }) => {
       const now = touch();
+      const region = input.region === 'US' ? 'US' : 'CA';
       update((prev) => {
         if (input.id) {
           return {
@@ -69,6 +71,7 @@ export function useCrm() {
                     phone: input.phone,
                     email: input.email,
                     notes: input.notes,
+                    region,
                     caslConsent: input.caslConsent,
                     updatedAt: now,
                   }
@@ -83,12 +86,23 @@ export function useCrm() {
           phone: input.phone,
           email: input.email,
           notes: input.notes,
+          region,
           caslConsent: input.caslConsent,
           createdAt: now,
           updatedAt: now,
         };
         return { ...prev, contacts: [...prev.contacts, contact] };
       });
+    },
+    [update],
+  );
+
+  const updateOwner = useCallback(
+    (patch: Partial<OwnerProfile>) => {
+      update((prev) => ({
+        ...prev,
+        owner: { ...prev.owner, ...patch },
+      }));
     },
     [update],
   );
@@ -382,6 +396,7 @@ export function useCrm() {
     searchContacts,
     getContact,
     upsertContact,
+    updateOwner,
     deleteContact,
     logsFor,
     addLog,

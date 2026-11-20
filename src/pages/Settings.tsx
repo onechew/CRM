@@ -1,49 +1,100 @@
-import { OWNER } from '../data/owner';
+import { useState } from 'react';
+import { Toast } from '../components/Toast';
+import { useCrmContext } from '../context/CrmContext';
 
 export function SettingsPage() {
+  const { state, updateOwner } = useCrmContext();
+  const [form, setForm] = useState(state.owner);
+  const [toast, setToast] = useState<string | null>(null);
+
   return (
     <div>
       <div className="section-head">
         <div>
           <h2>Your profile</h2>
           <p className="muted">
-            Send-from details for drafts. Email and SMS are not auto-sent yet.
+            Send-from email and Canada / US phone lines. Customer region on each
+            contact picks which line to use for SMS and call drafts.
           </p>
         </div>
       </div>
 
       <div className="panel panel-pad owner-card">
         <p className="owner-label">Owner</p>
-        <h3 className="owner-name">{OWNER.name}</h3>
-        <p className="owner-company">{OWNER.company}</p>
-
-        <dl className="owner-facts">
-          <div>
-            <dt>Email (send-from)</dt>
-            <dd>
-              <a className="mono owner-link" href={`mailto:${OWNER.email}`}>
-                {OWNER.email}
-              </a>
-            </dd>
+        <form
+          className="form-grid"
+          onSubmit={(e) => {
+            e.preventDefault();
+            updateOwner(form);
+            setToast('Profile saved');
+          }}
+        >
+          <div className="form-grid two">
+            <label className="field">
+              Name
+              <input
+                required
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+              />
+            </label>
+            <label className="field">
+              Company
+              <input
+                required
+                value={form.company}
+                onChange={(e) => setForm({ ...form, company: e.target.value })}
+              />
+            </label>
           </div>
-          <div>
-            <dt>Phone (SMS / calls)</dt>
-            <dd>
-              <a
-                className="mono owner-link"
-                href={`tel:${OWNER.phone.replace(/[^\d+]/g, '')}`}
-              >
-                {OWNER.phoneDisplay}
-              </a>
-            </dd>
+          <label className="field">
+            Email (send-from)
+            <input
+              type="email"
+              required
+              value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+            />
+          </label>
+          <div className="form-grid two">
+            <label className="field">
+              Canada phone
+              <input
+                required
+                inputMode="tel"
+                placeholder="+1-437-566-5598"
+                value={form.phoneCA}
+                onChange={(e) => setForm({ ...form, phoneCA: e.target.value })}
+              />
+            </label>
+            <label className="field">
+              US phone
+              <input
+                inputMode="tel"
+                placeholder="+1-XXX-XXX-XXXX (add your US line)"
+                value={form.phoneUS}
+                onChange={(e) => setForm({ ...form, phoneUS: e.target.value })}
+              />
+            </label>
           </div>
-        </dl>
-
-        <p className="casl-note" style={{ marginTop: '1.25rem' }}>
-          Drafts open in your mail or Messages app using these as your identity.
-          When you send real SMS later, honour STOP / ARRÊT promptly.
-        </p>
+          {!form.phoneUS.trim() ? (
+            <p className="casl-note">
+              US number not set yet — contacts marked United States will prompt you
+              to add it here before SMS/call from-line hints are complete.
+            </p>
+          ) : null}
+          <p className="casl-note">
+            Drafts still open in your mail or Messages app — nothing auto-sends.
+            Honour STOP / ARRÊT when you send real SMS later.
+          </p>
+          <div className="actions">
+            <button type="submit" className="btn btn-primary">
+              Save profile
+            </button>
+          </div>
+        </form>
       </div>
+      <Toast message={toast} onDone={() => setToast(null)} />
     </div>
   );
 }

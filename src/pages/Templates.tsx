@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Toast } from '../components/Toast';
 import { useCrmContext } from '../context/CrmContext';
+import type { Template } from '../types';
 
 export function TemplatesPage() {
   const { state, upsertTemplate, deleteTemplate } = useCrmContext();
@@ -14,11 +15,87 @@ export function TemplatesPage() {
     body: '',
   });
 
-  const openNew = () => {
+  const emailTemplates = useMemo(
+    () => state.templates.filter((t) => t.channel === 'email'),
+    [state.templates],
+  );
+  const smsTemplates = useMemo(
+    () => state.templates.filter((t) => t.channel === 'sms'),
+    [state.templates],
+  );
+
+  const openNew = (channel: 'email' | 'sms') => {
     setEditingId(null);
-    setForm({ name: '', channel: 'email', subject: '', body: '' });
+    setForm({ name: '', channel, subject: '', body: '' });
     setOpen(true);
   };
+
+  const renderColumn = (
+    title: string,
+    channel: 'email' | 'sms',
+    items: Template[],
+  ) => (
+    <section className="template-col panel" aria-label={`${title} templates`}>
+      <div className="template-col-head">
+        <div>
+          <h3>{title}</h3>
+          <p className="muted" style={{ margin: 0 }}>
+            {items.length} template{items.length === 1 ? '' : 's'}
+          </p>
+        </div>
+        <button
+          type="button"
+          className="btn btn-secondary btn-sm"
+          onClick={() => openNew(channel)}
+        >
+          Add {channel === 'email' ? 'email' : 'SMS'}
+        </button>
+      </div>
+      {items.length === 0 ? (
+        <div className="empty">No {title.toLowerCase()} templates yet.</div>
+      ) : (
+        <ul className="list">
+          {items.map((t) => (
+            <li key={t.id} className="list-row">
+              <div>
+                <div className="title">{t.name}</div>
+                {t.subject ? <div className="meta">{t.subject}</div> : null}
+                <p style={{ margin: '0.35rem 0 0', whiteSpace: 'pre-wrap' }}>{t.body}</p>
+              </div>
+              <div className="actions" style={{ flexDirection: 'column' }}>
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => {
+                    setEditingId(t.id);
+                    setForm({
+                      name: t.name,
+                      channel: t.channel,
+                      subject: t.subject ?? '',
+                      body: t.body,
+                    });
+                    setOpen(true);
+                  }}
+                >
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-sm"
+                  onClick={() => {
+                    deleteTemplate(t.id);
+                    setToast('Template deleted');
+                  }}
+                >
+                  Delete
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
 
   return (
     <div>
@@ -26,69 +103,22 @@ export function TemplatesPage() {
         <div>
           <h2>Templates</h2>
           <p className="muted" style={{ margin: 0 }}>
-            Save and reuse email & SMS drafts. Placeholders: {'{{name}}'}, {'{{company}}'}
+            Email and SMS kept separate. Placeholders: {'{{name}}'}, {'{{company}}'}
           </p>
         </div>
-        <button type="button" className="btn btn-primary" onClick={openNew}>
-          New template
-        </button>
       </div>
 
-      <div className="panel">
-        {state.templates.length === 0 ? (
-          <div className="empty">No templates yet.</div>
-        ) : (
-          <ul className="list">
-            {state.templates.map((t) => (
-              <li key={t.id} className="list-row">
-                <div>
-                  <div className="actions">
-                    <span className={`chip ${t.channel}`}>{t.channel}</span>
-                  </div>
-                  <div className="title" style={{ marginTop: '0.35rem' }}>
-                    {t.name}
-                  </div>
-                  {t.subject ? <div className="meta">{t.subject}</div> : null}
-                  <p style={{ margin: '0.35rem 0 0', whiteSpace: 'pre-wrap' }}>{t.body}</p>
-                </div>
-                <div className="actions" style={{ flexDirection: 'column' }}>
-                  <button
-                    type="button"
-                    className="btn btn-secondary btn-sm"
-                    onClick={() => {
-                      setEditingId(t.id);
-                      setForm({
-                        name: t.name,
-                        channel: t.channel,
-                        subject: t.subject ?? '',
-                        body: t.body,
-                      });
-                      setOpen(true);
-                    }}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-ghost btn-sm"
-                    onClick={() => {
-                      deleteTemplate(t.id);
-                      setToast('Template deleted');
-                    }}
-                  >
-                    Delete
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
+      <div className="template-split">
+        {renderColumn('Email', 'email', emailTemplates)}
+        {renderColumn('SMS', 'sms', smsTemplates)}
       </div>
 
       {open ? (
         <div className="drawer-overlay" role="dialog" aria-modal="true">
           <div className="drawer">
-            <h3>{editingId ? 'Edit template' : 'New template'}</h3>
+            <h3>
+              {editingId ? 'Edit' : 'New'} {form.channel === 'email' ? 'email' : 'SMS'} template
+            </h3>
             <form
               className="form-grid"
               onSubmit={(e) => {
@@ -111,21 +141,6 @@ export function TemplatesPage() {
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                 />
-              </label>
-              <label className="field">
-                Channel
-                <select
-                  value={form.channel}
-                  onChange={(e) =>
-                    setForm({
-                      ...form,
-                      channel: e.target.value as 'email' | 'sms',
-                    })
-                  }
-                >
-                  <option value="email">Email</option>
-                  <option value="sms">SMS</option>
-                </select>
               </label>
               {form.channel === 'email' ? (
                 <label className="field">

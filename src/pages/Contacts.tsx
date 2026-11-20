@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCrmContext } from '../context/CrmContext';
+import type { ContactRegion } from '../types';
 
 export function ContactsPage() {
   const { searchContacts, upsertContact, state } = useCrmContext();
@@ -12,6 +13,7 @@ export function ContactsPage() {
     phone: '',
     email: '',
     notes: '',
+    region: 'CA' as ContactRegion,
     caslConsent: false,
   });
 
@@ -49,7 +51,7 @@ export function ContactsPage() {
             <strong>{q.trim() ? 'No matches' : 'No contacts yet'}</strong>
             {q.trim()
               ? 'Try a different name, company, email, or phone.'
-              : 'Add real contacts as you go — nothing is pre-seeded.'}
+              : 'Add real contacts as you go — nothing is bulk-seeded.'}
           </div>
         ) : (
           <ul className="list">
@@ -66,6 +68,7 @@ export function ContactsPage() {
                   </div>
                 </div>
                 <div className="actions">
+                  <span className="chip">{c.region === 'US' ? 'US' : 'CA'}</span>
                   {c.caslConsent ? (
                     <span className="chip ok">Consent</span>
                   ) : (
@@ -93,6 +96,7 @@ export function ContactsPage() {
                   phone: '',
                   email: '',
                   notes: '',
+                  region: 'CA',
                   caslConsent: false,
                 });
                 setShowForm(false);
@@ -132,6 +136,18 @@ export function ContactsPage() {
                   />
                 </label>
               </div>
+              <label className="field">
+                Customer location
+                <select
+                  value={form.region}
+                  onChange={(e) =>
+                    setForm({ ...form, region: e.target.value as ContactRegion })
+                  }
+                >
+                  <option value="CA">Canada — use your CA phone line</option>
+                  <option value="US">United States — use your US phone line</option>
+                </select>
+              </label>
               <label className="field">
                 Notes
                 <textarea

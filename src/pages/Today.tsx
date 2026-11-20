@@ -1,11 +1,11 @@
 import { Link } from 'react-router-dom';
 import { DraftActions } from '../components/DraftActions';
 import { useCrmContext } from '../context/CrmContext';
-import { OWNER } from '../data/owner';
 import { formatWhen, isOverdue } from '../utils/drafts';
 
 export function TodayPage() {
   const {
+    state,
     todayItems,
     unreadNotifications,
     getContact,
@@ -13,38 +13,35 @@ export function TodayPage() {
     completeScheduled,
     cancelScheduled,
   } = useCrmContext();
+  const owner = state.owner;
 
   return (
     <div>
-      <section className="hero" aria-label="Future Buildings Today">
+      <section className="hero hero-compact" aria-label="Future Buildings">
         <div className="hero-brand">Future Buildings</div>
-        <h1>Today for {OWNER.name}</h1>
-        <p>
-          Pending follow-ups and reply alerts — open a draft on your phone or mail
-          client when you are ready. Nothing auto-sends.
+        <p className="hero-owner-name">
+          {owner.name} · {owner.company}
         </p>
-        <div className="owner-strip" aria-label="Your send-from profile">
-          <div>
-            <span className="owner-strip-label">You</span>
-            <strong>
-              {OWNER.name} · {OWNER.company}
-            </strong>
-          </div>
+        <div className="owner-strip" aria-label="Your send-from details">
           <div className="owner-strip-contacts">
-            <a href={`mailto:${OWNER.email}`}>{OWNER.email}</a>
+            <a href={`mailto:${owner.email}`}>{owner.email}</a>
             <span aria-hidden="true">·</span>
-            <a href={`tel:${OWNER.phone.replace(/[^\d+]/g, '')}`}>{OWNER.phoneDisplay}</a>
+            <span title="Canada line">CA {owner.phoneCA || '—'}</span>
+            <span aria-hidden="true">·</span>
+            <span title="US line">
+              US {owner.phoneUS.trim() ? owner.phoneUS : 'not set'}
+            </span>
             <Link className="owner-strip-edit" to="/settings">
-              Profile
+              Edit
             </Link>
           </div>
         </div>
         <div className="hero-actions">
           <Link className="btn btn-primary" to="/contacts">
-            Browse contacts
+            Contacts
           </Link>
           <Link className="btn btn-secondary" to="/schedule">
-            Schedule follow-up
+            Schedule
           </Link>
         </div>
       </section>
@@ -101,6 +98,7 @@ export function TodayPage() {
                       {overdue ? <span className="chip warn">Overdue</span> : (
                         <span className="chip">Today</span>
                       )}
+                      <span className="chip">{contact.region === 'US' ? 'US' : 'CA'}</span>
                     </div>
                     <Link className="title" to={`/contacts/${contact.id}`}>
                       {contact.name}
@@ -111,6 +109,7 @@ export function TodayPage() {
                     <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{item.body}</p>
                     <DraftActions
                       contact={contact}
+                      owner={owner}
                       channel={item.channel}
                       subject={item.subject}
                       body={item.body}

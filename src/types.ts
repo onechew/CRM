@@ -2,6 +2,19 @@ export type MessageChannel = 'email' | 'sms' | 'call';
 
 export type ScheduledStatus = 'pending' | 'due' | 'completed' | 'cancelled' | 'stopped';
 
+/** Customer location — picks which owner phone line to use for SMS/call drafts */
+export type ContactRegion = 'CA' | 'US';
+
+export interface OwnerProfile {
+  name: string;
+  company: string;
+  email: string;
+  /** Canada send-from / SMS line */
+  phoneCA: string;
+  /** US send-from / SMS line (editable; may be empty until set) */
+  phoneUS: string;
+}
+
 export interface Contact {
   id: string;
   name: string;
@@ -9,6 +22,8 @@ export interface Contact {
   phone: string;
   email: string;
   notes: string;
+  /** Where the customer is — selects Josh's CA vs US line */
+  region: ContactRegion;
   /** CASL: express or implied consent to receive CEMs */
   caslConsent: boolean;
   createdAt: string;
@@ -63,5 +78,6 @@ export interface CrmState {
   templates: Template[];
   scheduled: ScheduledItem[];
   notifications: AppNotification[];
+  owner: OwnerProfile;
   seeded: boolean;
 }

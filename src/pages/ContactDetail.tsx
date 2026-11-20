@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { DraftActions } from '../components/DraftActions';
 import { Toast } from '../components/Toast';
 import { useCrmContext } from '../context/CrmContext';
+import type { ContactRegion } from '../types';
 import {
   fillTemplate,
   formatWhen,
@@ -30,6 +31,7 @@ export function ContactDetailPage() {
   const contact = id ? getContact(id) : undefined;
   const logs = id ? logsFor(id) : [];
   const scheduled = id ? scheduledFor(id) : [];
+  const owner = state.owner;
 
   const [editing, setEditing] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
@@ -41,6 +43,7 @@ export function ContactDetailPage() {
     phone: '',
     email: '',
     notes: '',
+    region: 'CA' as ContactRegion,
     caslConsent: false,
   });
 
@@ -75,6 +78,7 @@ export function ContactDetailPage() {
       phone: contact.phone,
       email: contact.email,
       notes: contact.notes,
+      region: contact.region === 'US' ? 'US' : 'CA',
       caslConsent: contact.caslConsent,
     });
     setEditing(true);
@@ -102,6 +106,7 @@ export function ContactDetailPage() {
           <h2>{contact.name}</h2>
           <p className="muted" style={{ margin: 0 }}>
             {contact.company || 'No company'} ·{' '}
+            <span className="chip">{contact.region === 'US' ? 'US' : 'CA'}</span>{' '}
             {contact.caslConsent ? (
               <span className="chip ok">CASL consent</span>
             ) : (
@@ -164,13 +169,14 @@ export function ContactDetailPage() {
               {contact.email ? (
                 <DraftActions
                   contact={contact}
+                  owner={owner}
                   channel="email"
                   subject={`Following up — ${contact.company || contact.name}`}
                   body={`Hi ${contact.name.split(' ')[0]},\n\n`}
                 />
               ) : null}
               {contact.phone ? (
-                <DraftActions contact={contact} channel="sms" body="" />
+                <DraftActions contact={contact} owner={owner} channel="sms" body="" />
               ) : null}
             </div>
           </div>
@@ -280,6 +286,7 @@ export function ContactDetailPage() {
                     {(s.status === 'pending' || s.status === 'due') && (
                       <DraftActions
                         contact={contact}
+                        owner={owner}
                         channel={s.channel}
                         subject={s.subject}
                         body={s.body}
@@ -391,6 +398,21 @@ export function ContactDetailPage() {
                   />
                 </label>
               </div>
+              <label className="field">
+                Customer location
+                <select
+                  value={editForm.region}
+                  onChange={(e) =>
+                    setEditForm({
+                      ...editForm,
+                      region: e.target.value as ContactRegion,
+                    })
+                  }
+                >
+                  <option value="CA">Canada — use your CA phone line</option>
+                  <option value="US">United States — use your US phone line</option>
+                </select>
+              </label>
               <label className="field">
                 Notes
                 <textarea
