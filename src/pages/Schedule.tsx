@@ -43,14 +43,20 @@ function addMonths(d: Date, n: number) {
   return new Date(d.getFullYear(), d.getMonth() + n, 1);
 }
 
-function sameDay(a: string, b: string) {
-  return a === b;
-}
-
 function yearOptions(around: number) {
   const years: number[] = [];
   for (let y = around - 5; y <= around + 5; y++) years.push(y);
   return years;
+}
+
+function shortTime(iso: string) {
+  return new Date(iso).toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  }).replace(/\s*(a\.?\s*m\.?|p\.?\s*m\.?)/i, (_, mer: string) =>
+    /p/i.test(mer) ? ' PM' : ' AM',
+  );
 }
 
 export function SchedulePage() {
@@ -103,13 +109,34 @@ export function SchedulePage() {
       monthCursor.getMonth() + 1,
       0,
     ).getDate();
-    const cells: Array<{ date: Date; inMonth: boolean; key: string } | null> = [];
-    for (let i = 0; i < startPad; i++) cells.push(null);
+    const prevMonthDays = new Date(
+      monthCursor.getFullYear(),
+      monthCursor.getMonth(),
+      0,
+    ).getDate();
+
+    const cells: Array<{ date: Date; inMonth: boolean; key: string }> = [];
+    for (let i = startPad - 1; i >= 0; i--) {
+      const date = new Date(
+        monthCursor.getFullYear(),
+        monthCursor.getMonth() - 1,
+        prevMonthDays - i,
+      );
+      cells.push({ date, inMonth: false, key: dayKey(date) });
+    }
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(monthCursor.getFullYear(), monthCursor.getMonth(), day);
       cells.push({ date, inMonth: true, key: dayKey(date) });
     }
-    while (cells.length % 7 !== 0) cells.push(null);
+    let next = 1;
+    while (cells.length % 7 !== 0) {
+      const date = new Date(
+        monthCursor.getFullYear(),
+        monthCursor.getMonth() + 1,
+        next++,
+      );
+      cells.push({ date, inMonth: false, key: dayKey(date) });
+    }
     return cells;
   }, [monthCursor]);
 
@@ -156,13 +183,19 @@ export function SchedulePage() {
     setOpen(true);
   };
 
+  const selectedLabel = new Date(`${selectedDay}T12:00:00`).toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+  });
+
   return (
     <div>
       <div className="section-head">
         <div>
           <h2>Schedule</h2>
           <p className="muted" style={{ margin: 0 }}>
-            Month view of follow-ups and reminders by customer.
+            Plan follow-ups on the calendar. Click a day to add one.
           </p>
         </div>
         <button type="button" className="btn btn-primary" onClick={() => openNew()}>
@@ -170,181 +203,182 @@ export function SchedulePage() {
         </button>
       </div>
 
-      <div className="schedule-layout">
-        <section className="panel calendar-panel" aria-label="Month calendar">
-          <div className="calendar-toolbar">
-            <div className="calendar-toolbar-left">
-              <button type="button" className="btn btn-secondary btn-sm" onClick={goToday}>
-                Today
-              </button>
-              <div className="calendar-nav-arrows" role="group" aria-label="Month navigation">
-                <button
-                  type="button"
-                  className="btn btn-secondary btn-sm calendar-arrow"
-                  onClick={() => setMonthCursor((m) => addMonths(m, -1))}
-                  aria-label="Previous month"
-                >
-                  ‹
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-secondary btn-sm calendar-arrow"
-                  onClick={() => setMonthCursor((m) => addMonths(m, 1))}
-                  aria-label="Next month"
-                >
-                  ›
-                </button>
-              </div>
-              <div className="calendar-pickers">
-                <label className="calendar-picker">
-                  <span className="visually-hidden">Month</span>
-                  <select
-                    value={monthCursor.getMonth()}
-                    aria-label="Month"
-                    onChange={(e) => {
-                      const month = Number(e.target.value);
-                      setMonthCursor(new Date(monthCursor.getFullYear(), month, 1));
-                    }}
-                  >
-                    {MONTHS.map((label, idx) => (
-                      <option key={label} value={idx}>
-                        {label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label className="calendar-picker">
-                  <span className="visually-hidden">Year</span>
-                  <select
-                    value={monthCursor.getFullYear()}
-                    aria-label="Year"
-                    onChange={(e) => {
-                      const year = Number(e.target.value);
-                      setMonthCursor(new Date(year, monthCursor.getMonth(), 1));
-                    }}
-                  >
-                    {years.map((y) => (
-                      <option key={y} value={y}>
-                        {y}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              </div>
-            </div>
-          </div>
-
-          <div className="calendar-sheet">
-            <div className="calendar-weekdays">
-              {WEEKDAYS.map((d) => (
-                <div key={d} className="calendar-weekday">
-                  {d}
-                </div>
-              ))}
-            </div>
-
-            <div className="calendar-grid">
-              {calendarCells.map((cell, i) => {
-                if (!cell) {
-                  return <div key={`pad-${i}`} className="calendar-cell calendar-cell-pad" />;
-                }
-                const items = byDay.get(cell.key) ?? [];
-                const isSelected = sameDay(cell.key, selectedDay);
-                const isToday = sameDay(cell.key, todayKey);
-                return (
-                  <button
-                    key={cell.key}
-                    type="button"
-                    className={`calendar-cell${isSelected ? ' is-selected' : ''}${isToday ? ' is-today' : ''}`}
-                    onClick={() => {
-                      setSelectedDay(cell.key);
-                      if (items.length === 0) openNew(cell.key);
-                    }}
-                  >
-                    <span className={`calendar-day-num${isToday ? ' is-today' : ''}`}>
-                      {cell.date.getDate()}
-                    </span>
-                    <div className="calendar-events">
-                      {items.slice(0, 3).map((item) => {
-                        const c = getContact(item.contactId);
-                        return (
-                          <span
-                            key={item.id}
-                            className={`calendar-event calendar-event-${item.channel}`}
-                            title={`${item.channel}: ${c?.name ?? 'Unknown'}`}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedDay(cell.key);
-                              setDetailItem(item);
-                            }}
-                          >
-                            <span className="calendar-event-channel">{item.channel}</span>
-                            <span className="calendar-event-name">
-                              {c?.name ?? 'Unknown'}
-                            </span>
-                          </span>
-                        );
-                      })}
-                      {items.length > 3 ? (
-                        <span className="calendar-more">+{items.length - 3} more</span>
-                      ) : null}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
-        <aside className="panel schedule-day-panel" aria-label="Selected day">
-          <div className="panel-pad" style={{ borderBottom: '1px solid var(--line)' }}>
-            <h3>
-              {new Date(`${selectedDay}T12:00:00`).toLocaleDateString('en-US', {
-                weekday: 'long',
-                month: 'long',
-                day: 'numeric',
-              })}
-            </h3>
-            <p className="muted" style={{ margin: '0.25rem 0 0' }}>
-              {selectedItems.length === 0
-                ? 'Nothing scheduled this day.'
-                : `${selectedItems.length} follow-up${selectedItems.length === 1 ? '' : 's'}`}
-            </p>
-          </div>
-          {selectedItems.length === 0 ? (
-            <div className="empty">
+      <div className="gcal">
+        <div className="gcal-main">
+          <div className="gcal-toolbar">
+            <button type="button" className="btn btn-secondary btn-sm" onClick={goToday}>
+              Today
+            </button>
+            <div className="gcal-arrows" role="group" aria-label="Month navigation">
               <button
                 type="button"
-                className="btn btn-secondary btn-sm"
-                onClick={() => openNew(selectedDay)}
+                className="gcal-icon-btn"
+                onClick={() => setMonthCursor((m) => addMonths(m, -1))}
+                aria-label="Previous month"
               >
-                New follow-up this day
+                ‹
+              </button>
+              <button
+                type="button"
+                className="gcal-icon-btn"
+                onClick={() => setMonthCursor((m) => addMonths(m, 1))}
+                aria-label="Next month"
+              >
+                ›
               </button>
             </div>
+            <div className="gcal-title-pickers">
+              <select
+                className="gcal-title-select"
+                value={monthCursor.getMonth()}
+                aria-label="Month"
+                onChange={(e) => {
+                  setMonthCursor(
+                    new Date(monthCursor.getFullYear(), Number(e.target.value), 1),
+                  );
+                }}
+              >
+                {MONTHS.map((label, idx) => (
+                  <option key={label} value={idx}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+              <select
+                className="gcal-title-select"
+                value={monthCursor.getFullYear()}
+                aria-label="Year"
+                onChange={(e) => {
+                  setMonthCursor(
+                    new Date(Number(e.target.value), monthCursor.getMonth(), 1),
+                  );
+                }}
+              >
+                {years.map((y) => (
+                  <option key={y} value={y}>
+                    {y}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="gcal-weekdays" aria-hidden="true">
+            {WEEKDAYS.map((d) => (
+              <div key={d} className="gcal-weekday">
+                {d}
+              </div>
+            ))}
+          </div>
+
+          <div className="gcal-grid" role="grid" aria-label="Month">
+            {calendarCells.map((cell) => {
+              const items = byDay.get(cell.key) ?? [];
+              const isSelected = cell.key === selectedDay;
+              const isToday = cell.key === todayKey;
+              return (
+                <div
+                  key={cell.key}
+                  role="gridcell"
+                  tabIndex={0}
+                  className={[
+                    'gcal-cell',
+                    cell.inMonth ? '' : 'is-outside',
+                    isSelected ? 'is-selected' : '',
+                    isToday ? 'is-today' : '',
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
+                  onClick={() => {
+                    setSelectedDay(cell.key);
+                    openNew(cell.key);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setSelectedDay(cell.key);
+                      openNew(cell.key);
+                    }
+                  }}
+                >
+                  <span className={`gcal-date${isToday ? ' is-today' : ''}`}>
+                    {cell.date.getDate()}
+                  </span>
+                  <div className="gcal-chips">
+                    {items.slice(0, 3).map((item) => {
+                      const c = getContact(item.contactId);
+                      const name = c?.name ?? 'Unknown';
+                      return (
+                        <button
+                          key={item.id}
+                          type="button"
+                          className={`gcal-chip gcal-chip-${item.channel}`}
+                          title={`${name} · ${item.channel} · ${shortTime(item.dueAt)}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedDay(cell.key);
+                            setDetailItem(item);
+                          }}
+                        >
+                          <span className="gcal-chip-dot" aria-hidden="true" />
+                          <span className="gcal-chip-label">{name}</span>
+                        </button>
+                      );
+                    })}
+                    {items.length > 3 ? (
+                      <button
+                        type="button"
+                        className="gcal-more"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedDay(cell.key);
+                        }}
+                      >
+                        +{items.length - 3} more
+                      </button>
+                    ) : null}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <aside className="gcal-side" aria-label="Selected day">
+          <div className="gcal-side-head">
+            <h3>{selectedLabel}</h3>
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm"
+              onClick={() => openNew(selectedDay)}
+            >
+              Add
+            </button>
+          </div>
+          {selectedItems.length === 0 ? (
+            <p className="gcal-side-empty">No follow-ups. Click the day or Add to create one.</p>
           ) : (
-            <ul className="list">
+            <ul className="gcal-side-list">
               {selectedItems.map((s) => {
                 const c = getContact(s.contactId);
                 return (
                   <li key={s.id}>
                     <button
                       type="button"
-                      className="list-row list-row-clickable schedule-day-row"
+                      className="gcal-side-item"
                       onClick={() => setDetailItem(s)}
                     >
-                      <div>
-                        <div className="actions" style={{ gap: '0.35rem' }}>
-                          <span className={`chip ${s.channel}`}>{s.channel}</span>
-                          {s.sequenceId ? <span className="chip">Sequence</span> : null}
-                        </div>
-                        <div className="title" style={{ marginTop: '0.35rem' }}>
+                      <span className={`gcal-side-bar gcal-chip-${s.channel}`} aria-hidden="true" />
+                      <span className="gcal-side-copy">
+                        <span className="gcal-side-time">{shortTime(s.dueAt)}</span>
+                        <span className="gcal-side-name">
                           {c?.name ?? 'Unknown'}
                           {c?.company ? ` · ${c.company}` : ''}
-                        </div>
-                        <div className="meta">{formatWhen(s.dueAt)}</div>
-                        {s.subject ? <div className="meta">{s.subject}</div> : null}
-                        <p className="task-card-body schedule-day-body">{s.body}</p>
-                      </div>
+                        </span>
+                        <span className="gcal-side-channel">{s.channel}</span>
+                        {s.subject ? <span className="gcal-side-subject">{s.subject}</span> : null}
+                        <span className="gcal-side-body">{s.body}</span>
+                      </span>
                     </button>
                   </li>
                 );
