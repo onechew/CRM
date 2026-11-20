@@ -10,11 +10,16 @@ export function Layout() {
   return (
     <div className="app-shell">
       <header className="topbar">
-        <Link to="/" className="brand" aria-label="Future Buildings — Today">
-          <div className="brand-mark">Future Buildings</div>
-          <div className="brand-sub">
+        <Link
+          to="/"
+          className="brand"
+          aria-label="Go to Today — Future Buildings"
+          title="Go to Today"
+        >
+          <span className="brand-mark">Future Buildings</span>
+          <span className="brand-sub">
             {owner.name} · {owner.company}
-          </div>
+          </span>
         </Link>
         <nav className="nav-links" aria-label="Primary">
           <NavLink to="/" end className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>

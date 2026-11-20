@@ -29,24 +29,32 @@ export function TodayPage() {
     return () => window.clearInterval(id);
   }, []);
 
-  const weatherText = weather.loading
-    ? 'Loading weather…'
-    : weather.error
-      ? weather.error
-      : weather.tempC != null
-        ? `${weather.tempC}°C · ${weather.label ?? 'Toronto'}`
-        : 'Toronto';
+  const weatherNode = weather.loading ? (
+    <span>Loading weather…</span>
+  ) : weather.error ? (
+    <span>{weather.error}</span>
+  ) : (
+    <span className="hero-weather">
+      <span className="hero-weather-icon" aria-hidden="true">
+        {weather.icon ?? '🌡️'}
+      </span>
+      <span>
+        {weather.tempC != null ? `${weather.tempC}°C` : '—'}
+        {weather.label ? ` · ${weather.label}` : ''}
+      </span>
+    </span>
+  );
 
   return (
     <div>
       <section className="hero hero-compact" aria-label="Today">
-        <div className="hero-brand">{formatTorontoDate(now)}</div>
-        <p className="hero-owner-name hero-meta-line">
-          <span>{formatTorontoTime(now)}</span>
+        <div className="hero-date">{formatTorontoDate(now)}</div>
+        <p className="hero-meta-line">
+          <span className="hero-time">{formatTorontoTime(now)}</span>
           <span aria-hidden="true">·</span>
-          <span>{TORONTO_TZ_LABEL}</span>
+          <span className="hero-tz">{TORONTO_TZ_LABEL}</span>
           <span aria-hidden="true">·</span>
-          <span>{weatherText}</span>
+          {weatherNode}
         </p>
         <div className="owner-strip" aria-label="Your send-from details">
           <div className="owner-strip-contacts">

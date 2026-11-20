@@ -146,16 +146,30 @@ h3 {
 }
 
 .brand {
+  position: relative;
+  z-index: 5;
   display: flex;
   flex-direction: column;
   gap: 0.1rem;
   min-width: 0;
+  max-width: min(100%, 16rem);
+  padding: 0.15rem 0.2rem;
+  margin: -0.15rem -0.2rem;
   color: inherit;
   text-decoration: none;
+  cursor: pointer;
+  pointer-events: auto;
+  border-radius: 8px;
 }
 
-.brand:hover .brand-mark {
+.brand:hover .brand-mark,
+.brand:focus-visible .brand-mark {
   color: var(--steel);
+}
+
+.brand:focus-visible {
+  outline: 2px solid var(--steel);
+  outline-offset: 2px;
 }
 
 .brand-mark {
@@ -261,34 +275,51 @@ h3 {
   pointer-events: none;
 }
 
-.hero-brand {
+.hero-date {
   font-family: var(--font-display);
-  font-weight: 800;
-  font-size: clamp(1.55rem, 3.8vw, 2.15rem);
-  letter-spacing: var(--tracking-display);
-  line-height: var(--leading-tight);
-  margin-bottom: 0.2rem;
-  position: relative;
-  z-index: 1;
-}
-
-.hero-owner-name {
-  position: relative;
-  z-index: 1;
-  margin: 0 0 0.75rem;
-  font-size: var(--text-sm);
-  font-weight: 600;
-  letter-spacing: 0.01em;
+  font-weight: 700;
+  font-size: clamp(1.05rem, 2.4vw, 1.3rem);
+  letter-spacing: -0.015em;
   line-height: var(--leading-snug);
-  color: rgba(231, 238, 245, 0.82);
+  margin-bottom: 0.35rem;
+  position: relative;
+  z-index: 1;
+  color: rgba(245, 248, 251, 0.95);
 }
 
 .hero-meta-line {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.35rem 0.55rem;
-  font-weight: 500;
+  gap: 0.4rem 0.65rem;
+  margin: 0 0 0.85rem;
+  position: relative;
+  z-index: 1;
+  font-size: clamp(1rem, 2.2vw, 1.15rem);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: var(--leading-snug);
+  color: rgba(245, 248, 251, 0.92);
+}
+
+.hero-time {
+  font-weight: 700;
+}
+
+.hero-tz {
+  font-weight: 550;
+  opacity: 0.9;
+}
+
+.hero-weather {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.hero-weather-icon {
+  font-size: 1.35em;
+  line-height: 1;
 }
 
 .hero-compact .owner-strip {
