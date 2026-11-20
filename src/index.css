@@ -277,6 +277,14 @@ h3 {
   color: rgba(231, 238, 245, 0.82);
 }
 
+.hero-meta-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.55rem;
+  font-weight: 500;
+}
+
 .hero-compact .owner-strip {
   margin-top: 0;
 }

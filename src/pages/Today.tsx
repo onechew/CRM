@@ -1,6 +1,13 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { DraftActions } from '../components/DraftActions';
 import { useCrmContext } from '../context/CrmContext';
+import {
+  TORONTO_TZ_LABEL,
+  formatTorontoDate,
+  formatTorontoTime,
+  useTorontoWeather,
+} from '../hooks/useTorontoWeather';
 import { formatWhen, isOverdue } from '../utils/drafts';
 
 export function TodayPage() {
@@ -14,13 +21,32 @@ export function TodayPage() {
     cancelScheduled,
   } = useCrmContext();
   const owner = state.owner;
+  const weather = useTorontoWeather();
+  const [now, setNow] = useState(() => new Date());
+
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(new Date()), 30_000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  const weatherText = weather.loading
+    ? 'Loading weather…'
+    : weather.error
+      ? weather.error
+      : weather.tempC != null
+        ? `${weather.tempC}°C · ${weather.label ?? 'Toronto'}`
+        : 'Toronto';
 
   return (
     <div>
-      <section className="hero hero-compact" aria-label="Future Buildings">
-        <div className="hero-brand">Future Buildings</div>
-        <p className="hero-owner-name">
-          {owner.name} · {owner.company}
+      <section className="hero hero-compact" aria-label="Today">
+        <div className="hero-brand">{formatTorontoDate(now)}</div>
+        <p className="hero-owner-name hero-meta-line">
+          <span>{formatTorontoTime(now)}</span>
+          <span aria-hidden="true">·</span>
+          <span>{TORONTO_TZ_LABEL}</span>
+          <span aria-hidden="true">·</span>
+          <span>{weatherText}</span>
         </p>
         <div className="owner-strip" aria-label="Your send-from details">
           <div className="owner-strip-contacts">
