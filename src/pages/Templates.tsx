@@ -28,9 +28,23 @@ export function TemplatesPage() {
     [state.templates],
   );
 
+  const rowCount = Math.max(emailTemplates.length, smsTemplates.length, 1);
+
   const openNew = (channel: 'email' | 'sms') => {
     setEditingId(null);
     setForm({ name: '', channel, subject: '', body: '' });
+    setInsertTarget('body');
+    setOpen(true);
+  };
+
+  const openEdit = (t: Template) => {
+    setEditingId(t.id);
+    setForm({
+      name: t.name,
+      channel: t.channel,
+      subject: t.subject ?? '',
+      body: t.body,
+    });
     setInsertTarget('body');
     setOpen(true);
   };
@@ -62,82 +76,47 @@ export function TemplatesPage() {
     });
   };
 
-  const renderColumn = (
-    title: string,
-    channel: 'email' | 'sms',
-    items: Template[],
-  ) => (
-    <section
-      className={`template-col panel template-col-${channel}`}
-      aria-label={`${title} templates`}
-    >
-      <div className={`template-col-head template-col-head-${channel}`}>
-        <div>
-          <h3>{title}</h3>
+  const renderCard = (t: Template | undefined, channel: 'email' | 'sms') => {
+    if (!t) {
+      return (
+        <div className={`template-cell template-cell-empty template-cell-${channel}`}>
           <p className="muted" style={{ margin: 0 }}>
-            {items.length} template{items.length === 1 ? '' : 's'}
+            No {channel === 'email' ? 'email' : 'SMS'} template in this row
           </p>
         </div>
-        <button
-          type="button"
-          className="btn btn-secondary btn-sm"
-          onClick={() => openNew(channel)}
-        >
-          Add {channel === 'email' ? 'email' : 'SMS'}
-        </button>
+      );
+    }
+    return (
+      <div className={`template-cell template-cell-${channel}`}>
+        <div className="template-cell-main">
+          <div className="title">{t.name}</div>
+          {t.subject ? (
+            <div className="meta">{formatTemplateForDisplay(t.subject)}</div>
+          ) : null}
+          <p className="template-cell-body">{formatTemplateForDisplay(t.body)}</p>
+        </div>
+        <div className="template-cell-actions">
+          <button
+            type="button"
+            className="btn btn-secondary btn-sm"
+            onClick={() => openEdit(t)}
+          >
+            Edit
+          </button>
+          <button
+            type="button"
+            className="btn btn-ghost btn-sm"
+            onClick={() => {
+              deleteTemplate(t.id);
+              setToast('Template deleted');
+            }}
+          >
+            Delete
+          </button>
+        </div>
       </div>
-      <div className="template-col-body">
-        {items.length === 0 ? (
-          <div className="empty">No {title.toLowerCase()} templates yet.</div>
-        ) : (
-          <ul className="list">
-            {items.map((t) => (
-              <li key={t.id} className="list-row">
-                <div>
-                  <div className="title">{t.name}</div>
-                  {t.subject ? (
-                    <div className="meta">{formatTemplateForDisplay(t.subject)}</div>
-                  ) : null}
-                  <p style={{ margin: '0.35rem 0 0', whiteSpace: 'pre-wrap' }}>
-                    {formatTemplateForDisplay(t.body)}
-                  </p>
-                </div>
-                <div className="actions" style={{ flexDirection: 'column' }}>
-                  <button
-                    type="button"
-                    className="btn btn-secondary btn-sm"
-                    onClick={() => {
-                      setEditingId(t.id);
-                      setForm({
-                        name: t.name,
-                        channel: t.channel,
-                        subject: t.subject ?? '',
-                        body: t.body,
-                      });
-                      setInsertTarget('body');
-                      setOpen(true);
-                    }}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-ghost btn-sm"
-                    onClick={() => {
-                      deleteTemplate(t.id);
-                      setToast('Template deleted');
-                    }}
-                  >
-                    Delete
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-    </section>
-  );
+    );
+  };
 
   return (
     <div>
@@ -145,15 +124,49 @@ export function TemplatesPage() {
         <div>
           <h2>Templates</h2>
           <p className="muted" style={{ margin: 0 }}>
-            Email on the left, SMS on the right. Tap insert chips to add customer
-            details automatically.
+            Email on the left, SMS on the right. Use insert chips for customer details.
           </p>
         </div>
       </div>
 
-      <div className="template-split">
-        {renderColumn('Email', 'email', emailTemplates)}
-        {renderColumn('SMS', 'sms', smsTemplates)}
+      <div className="template-board" style={{ ['--template-rows' as string]: String(rowCount) }}>
+        <div className="template-col-head template-col-head-email">
+          <div>
+            <h3>Email</h3>
+            <p className="muted" style={{ margin: 0 }}>
+              {emailTemplates.length} template{emailTemplates.length === 1 ? '' : 's'}
+            </p>
+          </div>
+          <button
+            type="button"
+            className="btn btn-secondary btn-sm"
+            onClick={() => openNew('email')}
+          >
+            Add email
+          </button>
+        </div>
+        <div className="template-col-head template-col-head-sms">
+          <div>
+            <h3>SMS</h3>
+            <p className="muted" style={{ margin: 0 }}>
+              {smsTemplates.length} template{smsTemplates.length === 1 ? '' : 's'}
+            </p>
+          </div>
+          <button
+            type="button"
+            className="btn btn-secondary btn-sm"
+            onClick={() => openNew('sms')}
+          >
+            Add SMS
+          </button>
+        </div>
+
+        {Array.from({ length: rowCount }, (_, i) => (
+          <div key={`row-${i}`} className="template-row-pair" style={{ gridColumn: '1 / -1' }}>
+            {renderCard(emailTemplates[i], 'email')}
+            {renderCard(smsTemplates[i], 'sms')}
+          </div>
+        ))}
       </div>
 
       {open ? (

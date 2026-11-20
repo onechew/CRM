@@ -947,45 +947,18 @@ label.field select:focus {
   font-weight: 400;
 }
 
-.template-split {
+.template-board {
   display: grid;
-  gap: var(--space-4);
   grid-template-columns: 1fr;
+  gap: 0.75rem;
   align-items: stretch;
 }
 
 @media (min-width: 860px) {
-  .template-split {
+  .template-board {
     grid-template-columns: 1fr 1fr;
+    gap: 0.85rem 1rem;
   }
-}
-
-.template-col {
-  display: flex;
-  flex-direction: column;
-  min-height: 28rem;
-  background: #fff;
-}
-
-.template-col-body {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.template-col-body .list,
-.template-col-body .empty {
-  flex: 1;
-}
-
-.template-col-email {
-  border-color: rgba(63, 111, 146, 0.28);
-  box-shadow: 0 2px 10px rgba(63, 111, 146, 0.06);
-}
-
-.template-col-sms {
-  border-color: rgba(168, 132, 58, 0.32);
-  box-shadow: 0 2px 10px rgba(168, 132, 58, 0.07);
 }
 
 .template-col-head {
@@ -993,17 +966,27 @@ label.field select:focus {
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
-  padding: var(--space-4) var(--space-5);
-  border-bottom: 1px solid var(--line);
+  min-height: 4.75rem;
+  height: 4.75rem;
+  padding: 0 var(--space-5);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  box-sizing: border-box;
 }
 
 .template-col-head h3 {
   font-size: var(--text-md);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.template-col-head .muted {
+  line-height: 1.2;
 }
 
 .template-col-head-email {
   background: linear-gradient(180deg, #e8f1f7 0%, #f3f8fb 100%);
-  border-bottom-color: rgba(63, 111, 146, 0.22);
+  border-color: rgba(63, 111, 146, 0.28);
 }
 
 .template-col-head-email h3 {
@@ -1012,11 +995,76 @@ label.field select:focus {
 
 .template-col-head-sms {
   background: linear-gradient(180deg, #f5edd9 0%, #faf6eb 100%);
-  border-bottom-color: rgba(168, 132, 58, 0.28);
+  border-color: rgba(168, 132, 58, 0.32);
 }
 
 .template-col-head-sms h3 {
   color: #6e5420;
+}
+
+.template-row-pair {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+  align-items: stretch;
+}
+
+@media (min-width: 860px) {
+  .template-row-pair {
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+}
+
+.template-cell {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--space-3);
+  align-items: start;
+  min-height: 9.5rem;
+  height: 100%;
+  padding: 1rem 1.15rem;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  box-sizing: border-box;
+}
+
+.template-cell-email {
+  border-color: rgba(63, 111, 146, 0.22);
+  box-shadow: 0 2px 8px rgba(63, 111, 146, 0.05);
+}
+
+.template-cell-sms {
+  border-color: rgba(168, 132, 58, 0.26);
+  box-shadow: 0 2px 8px rgba(168, 132, 58, 0.06);
+}
+
+.template-cell-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.65);
+}
+
+.template-cell-main {
+  min-width: 0;
+}
+
+.template-cell-body {
+  margin: 0.35rem 0 0;
+  white-space: pre-wrap;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.template-cell-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  align-items: stretch;
 }
 
 .insert-chips {
