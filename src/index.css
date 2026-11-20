@@ -1348,6 +1348,29 @@ select:focus {
   gap: 10px;
   margin-bottom: 14px;
 }
+.channel-include {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  cursor: pointer;
+}
+.channel-include input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  flex: 0 0 auto;
+  accent-color: var(--accent, #2457d6);
+}
+.channel-schedule.sms-schedule .channel-include input[type="checkbox"] {
+  accent-color: #0f766e;
+}
+.channel-schedule.is-disabled {
+  opacity: 0.62;
+}
+.channel-schedule.is-disabled .form-grid {
+  pointer-events: none;
+}
 .channel-schedule-title strong,
 .channel-schedule-title small {
   display: block;
