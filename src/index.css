@@ -1388,6 +1388,20 @@ label.field select:focus {
   min-width: 0;
 }
 
+.template-cell .title {
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: var(--leading-snug);
+  color: var(--ink);
+}
+
+.template-cell .meta {
+  font-weight: 500;
+  color: var(--slate);
+}
+
 .template-cell-body {
   margin: 0.35rem 0 0;
   white-space: pre-wrap;
@@ -1395,6 +1409,10 @@ label.field select:focus {
   -webkit-line-clamp: 4;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  font-size: var(--text-sm);
+  font-weight: 400;
+  line-height: var(--leading-snug);
+  color: var(--slate);
 }
 
 .template-cell-actions {
