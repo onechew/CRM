@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { DraftActions } from '../components/DraftActions';
 import { useCrmContext } from '../context/CrmContext';
+import { OWNER } from '../data/owner';
 import { formatWhen, isOverdue } from '../utils/drafts';
 
 export function TodayPage() {
@@ -17,11 +18,27 @@ export function TodayPage() {
     <div>
       <section className="hero" aria-label="Future Buildings Today">
         <div className="hero-brand">Future Buildings</div>
-        <h1>Today for Josh Schwartz</h1>
+        <h1>Today for {OWNER.name}</h1>
         <p>
           Pending follow-ups and reply alerts — open a draft on your phone or mail
           client when you are ready. Nothing auto-sends.
         </p>
+        <div className="owner-strip" aria-label="Your send-from profile">
+          <div>
+            <span className="owner-strip-label">You</span>
+            <strong>
+              {OWNER.name} · {OWNER.company}
+            </strong>
+          </div>
+          <div className="owner-strip-contacts">
+            <a href={`mailto:${OWNER.email}`}>{OWNER.email}</a>
+            <span aria-hidden="true">·</span>
+            <a href={`tel:${OWNER.phone.replace(/[^\d+]/g, '')}`}>{OWNER.phoneDisplay}</a>
+            <Link className="owner-strip-edit" to="/settings">
+              Profile
+            </Link>
+          </div>
+        </div>
         <div className="hero-actions">
           <Link className="btn btn-primary" to="/contacts">
             Browse contacts

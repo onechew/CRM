@@ -4,6 +4,7 @@ import { CrmProvider } from './context/CrmContext';
 import { ContactDetailPage } from './pages/ContactDetail';
 import { ContactsPage } from './pages/Contacts';
 import { SchedulePage } from './pages/Schedule';
+import { SettingsPage } from './pages/Settings';
 import { TemplatesPage } from './pages/Templates';
 import { TodayPage } from './pages/Today';
 
@@ -18,6 +19,7 @@ export default function App() {
             <Route path="contacts/:id" element={<ContactDetailPage />} />
             <Route path="templates" element={<TemplatesPage />} />
             <Route path="schedule" element={<SchedulePage />} />
+            <Route path="settings" element={<SettingsPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         </Routes>

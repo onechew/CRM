@@ -38,6 +38,12 @@ export function Layout() {
           >
             Schedule
           </NavLink>
+          <NavLink
+            to="/settings"
+            className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}
+          >
+            Profile
+          </NavLink>
         </nav>
       </header>
       <main className="main">
