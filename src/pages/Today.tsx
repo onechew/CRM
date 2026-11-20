@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { DraftActions } from '../components/DraftActions';
 import { useCrmContext } from '../context/CrmContext';
 import {
   TORONTO_TZ_LABEL,
@@ -8,7 +7,14 @@ import {
   formatTorontoTime,
   useTorontoWeather,
 } from '../hooks/useTorontoWeather';
-import { formatWhen, isOverdue } from '../utils/drafts';
+import { copyText, formatWhen, isOverdue, mailtoHref, smsHref } from '../utils/drafts';
+import { Toast } from '../components/Toast';
+
+function previewText(body: string, max = 140) {
+  const flat = body.replace(/\s+/g, ' ').trim();
+  if (flat.length <= max) return flat;
+  return `${flat.slice(0, max - 1).trimEnd()}…`;
+}
 
 export function TodayPage() {
   const {
@@ -23,6 +29,7 @@ export function TodayPage() {
   const owner = state.owner;
   const weather = useTorontoWeather();
   const [now, setNow] = useState(() => new Date());
+  const [toast, setToast] = useState<string | null>(null);
 
   useEffect(() => {
     const id = window.setInterval(() => setNow(new Date()), 30_000);
@@ -30,9 +37,9 @@ export function TodayPage() {
   }, []);
 
   const weatherNode = weather.loading ? (
-    <span>Loading weather…</span>
+    <span className="hero-weather">Loading weather…</span>
   ) : weather.error ? (
-    <span>{weather.error}</span>
+    <span className="hero-weather">{weather.error}</span>
   ) : (
     <span className="hero-weather">
       <span className="hero-weather-icon" aria-hidden="true">
@@ -45,36 +52,65 @@ export function TodayPage() {
     </span>
   );
 
+  const openDraft = (item: (typeof todayItems)[number], contact: NonNullable<ReturnType<typeof getContact>>) => {
+    if (item.channel === 'email') {
+      window.location.href = mailtoHref(contact.email, item.subject, item.body);
+      return;
+    }
+    if (item.channel === 'sms') {
+      window.location.href = smsHref(contact.phone, item.body);
+      return;
+    }
+    if (contact.phone) {
+      window.location.href = `tel:${contact.phone.replace(/[^\d+]/g, '')}`;
+    }
+  };
+
+  const copyDraft = async (item: (typeof todayItems)[number]) => {
+    const text = item.subject ? `Subject: ${item.subject}\n\n${item.body}` : item.body;
+    await copyText(text);
+    setToast('Draft copied');
+  };
+
   return (
     <div>
       <section className="hero hero-compact" aria-label="Today">
-        <div className="hero-date">{formatTorontoDate(now)}</div>
         <p className="hero-meta-line">
+          <span className="hero-date">{formatTorontoDate(now)}</span>
+          <span className="hero-sep" aria-hidden="true">
+            ·
+          </span>
           <span className="hero-time">{formatTorontoTime(now)}</span>
-          <span aria-hidden="true">·</span>
+          <span className="hero-sep" aria-hidden="true">
+            ·
+          </span>
           <span className="hero-tz">{TORONTO_TZ_LABEL}</span>
-          <span aria-hidden="true">·</span>
+          <span className="hero-sep" aria-hidden="true">
+            ·
+          </span>
           {weatherNode}
         </p>
-        <p className="owner-strip owner-strip-contacts" aria-label="Your send-from details">
-          <a href={`mailto:${owner.email}`}>{owner.email}</a>
-          <span aria-hidden="true">·</span>
-          <span title="Canada line">🇨🇦 {owner.phoneCA || '-'}</span>
-          <span aria-hidden="true">·</span>
-          <span title="US line">
-            🇺🇸 {owner.phoneUS.trim() ? owner.phoneUS : 'not set'}
-          </span>
-          <Link className="owner-strip-edit" to="/settings">
-            Edit
-          </Link>
-        </p>
-        <div className="hero-actions">
-          <Link className="btn btn-primary" to="/contacts">
-            Contacts
-          </Link>
-          <Link className="btn btn-secondary" to="/schedule">
-            Schedule
-          </Link>
+        <div className="hero-toolbar">
+          <p className="owner-strip owner-strip-contacts" aria-label="Your send-from details">
+            <a href={`mailto:${owner.email}`}>{owner.email}</a>
+            <span aria-hidden="true">·</span>
+            <span title="Canada line">🇨🇦 {owner.phoneCA || '-'}</span>
+            <span aria-hidden="true">·</span>
+            <span title="US line">
+              🇺🇸 {owner.phoneUS.trim() ? owner.phoneUS : 'not set'}
+            </span>
+            <Link className="owner-strip-edit" to="/settings">
+              Edit
+            </Link>
+          </p>
+          <div className="hero-actions">
+            <Link className="btn btn-primary" to="/contacts">
+              Contacts
+            </Link>
+            <Link className="btn btn-secondary" to="/schedule">
+              Schedule
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -113,66 +149,76 @@ export function TodayPage() {
         </div>
       </div>
 
-      <div className="panel">
-        {todayItems.length === 0 ? (
+      {todayItems.length === 0 ? (
+        <div className="panel">
           <div className="empty">You are clear. Schedule the next touch when ready.</div>
-        ) : (
-          <ul className="list">
-            {todayItems.map((item) => {
-              const contact = getContact(item.contactId);
-              if (!contact) return null;
-              const overdue = isOverdue(item.dueAt);
-              return (
-                <li key={item.id} className="list-row list-row-stack">
-                  <div className="stack">
-                    <div className="actions" style={{ gap: '0.4rem' }}>
-                      <span className={`chip ${item.channel}`}>{item.channel}</span>
-                      {overdue ? <span className="chip warn">Overdue</span> : (
-                        <span className="chip">Today</span>
-                      )}
-                      <span className="chip" title={contact.region === 'US' ? 'United States' : 'Canada'}>
-                        {contact.region === 'US' ? '🇺🇸' : '🇨🇦'}
-                      </span>
-                    </div>
-                    <Link className="title" to={`/contacts/${contact.id}`}>
-                      {contact.name}
-                      {contact.company ? ` · ${contact.company}` : ''}
-                    </Link>
-                    <div className="meta">{formatWhen(item.dueAt)}</div>
-                    {item.subject ? <div className="meta">{item.subject}</div> : null}
-                    <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{item.body}</p>
-                    <DraftActions
-                      contact={contact}
-                      owner={owner}
-                      channel={item.channel}
-                      subject={item.subject}
-                      body={item.body}
-                      extra={
-                        <>
-                          <button
-                            type="button"
-                            className="btn btn-secondary btn-sm"
-                            onClick={() => completeScheduled(item.id)}
-                          >
-                            Mark done
-                          </button>
-                          <button
-                            type="button"
-                            className="btn btn-secondary btn-sm"
-                            onClick={() => cancelScheduled(item.id)}
-                          >
-                            Cancel
-                          </button>
-                        </>
-                      }
-                    />
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </div>
+        </div>
+      ) : (
+        <ul className="task-list">
+          {todayItems.map((item) => {
+            const contact = getContact(item.contactId);
+            if (!contact) return null;
+            const overdue = isOverdue(item.dueAt);
+            const openLabel =
+              item.channel === 'email'
+                ? 'Open'
+                : item.channel === 'sms'
+                  ? 'Open'
+                  : 'Call';
+            return (
+              <li key={item.id} className="task-card">
+                <div className="task-card-meta">
+                  <span className={`chip ${item.channel}`}>{item.channel}</span>
+                  {overdue ? <span className="chip warn">Overdue</span> : <span className="chip">Today</span>}
+                  <span className="task-card-when">{formatWhen(item.dueAt)}</span>
+                  <span className="task-card-flag" title={contact.region === 'US' ? 'United States' : 'Canada'}>
+                    {contact.region === 'US' ? '🇺🇸' : '🇨🇦'}
+                  </span>
+                </div>
+                <Link className="task-card-title" to={`/contacts/${contact.id}`}>
+                  {contact.name}
+                  {contact.company ? ` · ${contact.company}` : ''}
+                </Link>
+                {item.subject ? <div className="task-card-subject">{item.subject}</div> : null}
+                <p className="task-card-preview">{previewText(item.body)}</p>
+                <div className="task-card-actions">
+                  <button
+                    type="button"
+                    className="btn btn-primary btn-sm"
+                    onClick={() => openDraft(item, contact)}
+                  >
+                    {openLabel}
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-secondary btn-sm task-card-copy"
+                    onClick={() => copyDraft(item)}
+                    title="Copy draft"
+                  >
+                    Copy
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-secondary btn-sm"
+                    onClick={() => completeScheduled(item.id)}
+                  >
+                    Done
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-secondary btn-sm"
+                    onClick={() => cancelScheduled(item.id)}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+
+      <Toast message={toast} onDone={() => setToast(null)} />
     </div>
   );
 }
