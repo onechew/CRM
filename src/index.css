@@ -1,10 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
 
 /*
   Future Buildings CRM - product UI
-  Typography: single family - Source Sans 3 (weights for hierarchy)
-  Patterns: clear hierarchy, 44px touch targets, high-contrast text,
-  contacts / messages / reminders first - not a busy dashboard.
+  Typography: one family (Source Sans 3), Apple/Airbnb/Google-style scale
+  Roles: page title / section / body / meta
+  Weights: 400 body, 500 emphasis, 600 section, 700 page/title
 */
 
 :root {
@@ -29,20 +29,36 @@
   --radius: 12px;
   --radius-md: 12px;
   --radius-lg: 18px;
-  --font-display: 'Source Sans 3', sans-serif;
-  --font-body: 'Source Sans 3', sans-serif;
-  --font-mono: 'Source Sans 3', ui-monospace, monospace;
-  --text-xs: 0.8125rem;
+
+  /* Single family everywhere */
+  --font: 'Source Sans 3', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: var(--font);
+  --font-body: var(--font);
+  --font-mono: var(--font);
+
+  /* Type scale: page / section / body / meta */
+  --text-page: clamp(1.5rem, 2.4vw, 1.75rem);
+  --text-section: 1.125rem;
+  --text-body: 1rem;
+  --text-meta: 0.875rem;
+  --text-xs: var(--text-meta);
   --text-sm: 0.9375rem;
-  --text-base: 1.0625rem;
-  --text-md: 1.25rem;
-  --text-lg: 1.5rem;
-  --text-xl: clamp(1.85rem, 4.5vw, 2.75rem);
-  --leading-tight: 1.18;
+  --text-base: var(--text-body);
+  --text-md: var(--text-section);
+  --text-lg: var(--text-page);
+  --text-xl: clamp(1.75rem, 3.5vw, 2.25rem);
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  --leading-tight: 1.2;
   --leading-snug: 1.35;
-  --leading-body: 1.55;
-  --tracking-display: -0.03em;
-  --tracking-body: 0.01em;
+  --leading-body: 1.5;
+  --tracking-tight: -0.02em;
+  --tracking-display: var(--tracking-tight);
+  --tracking-body: 0;
   --touch: 2.75rem; /* 44px */
   --nav-h: 4rem;
   --space-1: 0.25rem;
@@ -73,9 +89,9 @@ body,
 
 body {
   margin: 0;
-  font-family: var(--font-body);
-  font-size: var(--text-base);
-  font-weight: 400;
+  font-family: var(--font);
+  font-size: var(--text-body);
+  font-weight: var(--weight-regular);
   letter-spacing: var(--tracking-body);
   line-height: var(--leading-body);
   color: var(--ink);
@@ -109,16 +125,53 @@ button {
   cursor: pointer;
 }
 
+/* Page title */
 h1,
 h2,
-h3 {
-  font-family: var(--font-display);
-  font-weight: 700;
-  letter-spacing: var(--tracking-display);
+.type-page,
+.section-head h2 {
+  font-family: var(--font);
+  font-size: var(--text-page);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-tight);
   line-height: var(--leading-tight);
   margin: 0;
   text-wrap: balance;
   color: var(--ink);
+}
+
+/* Section title */
+h3,
+.type-section {
+  font-family: var(--font);
+  font-size: var(--text-section);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-tight);
+  line-height: var(--leading-snug);
+  margin: 0;
+  text-wrap: balance;
+  color: var(--ink);
+}
+
+/* Body */
+.type-body,
+p {
+  font-family: var(--font);
+  font-size: var(--text-body);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-body);
+}
+
+/* Meta / secondary */
+.type-meta,
+.meta,
+.muted,
+.casl-note {
+  font-family: var(--font);
+  font-size: var(--text-meta);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-snug);
+  color: var(--slate);
 }
 
 .app-shell {
@@ -178,19 +231,19 @@ h3 {
 }
 
 .brand-mark {
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: var(--text-md);
-  letter-spacing: var(--tracking-display);
+  font-family: var(--font);
+  font-weight: var(--weight-bold);
+  font-size: var(--text-section);
+  letter-spacing: var(--tracking-tight);
   line-height: var(--leading-tight);
   color: var(--ink);
 }
 
 .brand-sub {
-  font-family: var(--font-body);
-  font-size: var(--text-xs);
-  font-weight: 550;
-  letter-spacing: 0.03em;
+  font-family: var(--font);
+  font-size: var(--text-meta);
+  font-weight: var(--weight-medium);
+  letter-spacing: 0;
   line-height: var(--leading-snug);
   color: var(--slate);
   white-space: nowrap;
@@ -222,7 +275,7 @@ h3 {
   min-height: var(--touch);
   padding: 0 0.95rem;
   border-radius: 999px;
-  font-family: var(--font-body);
+  font-family: var(--font);
   font-size: var(--text-sm);
   font-weight: 600;
   letter-spacing: 0.015em;
@@ -307,7 +360,7 @@ h3 {
 }
 
 .hero-date {
-  font-family: var(--font-display);
+  font-family: var(--font);
   font-weight: 700;
   letter-spacing: -0.015em;
   color: rgba(245, 248, 251, 0.98);
@@ -323,7 +376,7 @@ h3 {
 }
 
 .hero-tz {
-  font-weight: 550;
+  font-weight: 500;
   opacity: 0.9;
 }
 
@@ -375,9 +428,9 @@ h3 {
   flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem 0.75rem;
-  font-family: var(--font-mono);
+  font-family: var(--font);
   font-size: clamp(1.05rem, 2.2vw, 1.2rem);
-  font-weight: 550;
+  font-weight: 500;
   line-height: 1.35;
   color: rgba(231, 238, 245, 0.92);
 }
@@ -397,9 +450,9 @@ h3 {
 }
 
 .owner-strip-edit {
-  font-family: var(--font-body) !important;
+  font-family: var(--font) !important;
   font-size: 0.95em !important;
-  font-weight: 650;
+  font-weight: 600;
   letter-spacing: 0.02em;
   margin-left: 0.15rem;
   padding: 0;
@@ -497,14 +550,11 @@ h3 {
 }
 
 .section-head h2 {
-  font-size: var(--text-lg);
-  font-weight: 700;
+  font-size: var(--text-page);
+  font-weight: var(--weight-bold);
 }
 
 .muted {
-  color: var(--slate);
-  font-size: var(--text-sm);
-  line-height: var(--leading-snug);
   margin: 0.2rem 0 0;
 }
 
@@ -577,10 +627,10 @@ h3 {
 
 .list-row a.title,
 .list-row .title {
-  font-family: var(--font-display);
-  font-size: var(--text-md);
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-family: var(--font);
+  font-size: var(--text-section);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-tight);
   line-height: var(--leading-snug);
   color: var(--ink);
 }
@@ -656,11 +706,11 @@ h3 {
 }
 
 .contacts-name {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: var(--text-base) !important;
+  font-family: var(--font);
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-body) !important;
   color: var(--ink) !important;
-  letter-spacing: -0.015em;
+  letter-spacing: var(--tracking-tight);
 }
 
 .contacts-row {
@@ -717,10 +767,6 @@ h3 {
 }
 
 .meta {
-  font-size: var(--text-sm);
-  font-weight: 450;
-  line-height: var(--leading-snug);
-  color: var(--slate);
   margin-top: 0.2rem;
 }
 
@@ -731,9 +777,9 @@ h3 {
   min-height: 1.5rem;
   padding: 0.2rem 0.6rem;
   border-radius: 999px;
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
+  font-size: 0.75rem;
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   background: rgba(63, 111, 146, 0.12);
   color: var(--ink-soft);
@@ -773,8 +819,8 @@ h3 {
   padding: 0 1.1rem;
   border-radius: 10px;
   border: 1px solid transparent;
-  font-family: var(--font-body);
-  font-weight: 650;
+  font-family: var(--font);
+  font-weight: 600;
   font-size: var(--text-sm);
   letter-spacing: 0.01em;
   line-height: 1.2;
@@ -911,10 +957,10 @@ h3 {
 }
 
 .task-card-title {
-  font-family: var(--font-display);
-  font-size: var(--text-md);
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-family: var(--font);
+  font-size: var(--text-section);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-tight);
   line-height: var(--leading-snug);
   color: var(--ink);
   width: 100%;
@@ -1088,7 +1134,7 @@ label.field select {
   background: var(--surface-solid);
   outline: none;
   font-size: var(--text-base);
-  font-weight: 450;
+  font-weight: 400;
   letter-spacing: var(--tracking-body);
   text-transform: none;
   color: var(--ink);
@@ -1117,7 +1163,7 @@ label.field select:focus {
   color: var(--ink-soft);
   text-transform: none;
   letter-spacing: var(--tracking-body);
-  font-weight: 450;
+  font-weight: 400;
 }
 
 .check-row input {
@@ -1153,7 +1199,7 @@ label.field select:focus {
 
 .empty strong {
   display: block;
-  font-family: var(--font-display);
+  font-family: var(--font);
   font-size: var(--text-md);
   font-weight: 700;
   color: var(--ink);
@@ -1191,7 +1237,7 @@ label.field select:focus {
   box-shadow: var(--shadow);
   animation: rise 250ms ease both;
   font-size: var(--text-sm);
-  font-weight: 550;
+  font-weight: 500;
   line-height: var(--leading-snug);
 }
 
@@ -1209,13 +1255,13 @@ label.field select:focus {
 }
 
 .notify-banner strong {
-  font-family: var(--font-display);
+  font-family: var(--font);
   font-size: var(--text-sm);
   letter-spacing: -0.01em;
 }
 
 .mono {
-  font-family: var(--font-mono);
+  font-family: var(--font);
   font-size: var(--text-sm);
   font-weight: 500;
   letter-spacing: 0;
@@ -1389,16 +1435,17 @@ label.field select:focus {
 }
 
 .template-cell .title {
-  font-family: var(--font-display);
-  font-size: var(--text-md);
-  font-weight: 800;
-  letter-spacing: -0.02em;
+  font-family: var(--font);
+  font-size: var(--text-section);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-tight);
   line-height: var(--leading-snug);
   color: var(--ink);
 }
 
 .template-cell .meta {
-  font-weight: 500;
+  font-size: var(--text-meta);
+  font-weight: var(--weight-medium);
   color: var(--slate);
 }
 
@@ -1409,8 +1456,8 @@ label.field select:focus {
   -webkit-line-clamp: 4;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  font-size: var(--text-sm);
-  font-weight: 400;
+  font-size: var(--text-meta);
+  font-weight: var(--weight-regular);
   line-height: var(--leading-snug);
   color: var(--slate);
 }
@@ -1447,7 +1494,7 @@ label.field select:focus {
   background: #eef5fa;
   color: #2a5570;
   font-size: var(--text-xs);
-  font-weight: 650;
+  font-weight: 600;
   letter-spacing: 0.01em;
   cursor: pointer;
 }
